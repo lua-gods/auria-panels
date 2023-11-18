@@ -15,6 +15,12 @@ function myPageApi:newText()
    return obj
 end
 
+function api.press(obj)
+   if obj.press then
+      obj:press()
+   end
+end
+
 -- methods
 --- set text of text element, returns itself for chaining
 --- @param text string
@@ -22,6 +28,14 @@ end
 function methods:setText(text)
    self.text = text
    panels.reload()
+   return self
+end
+
+--- sets function that will be called when text is pressed, returns itself for chaining
+--- @param func function
+--- @return panelsElementText
+function methods:onPress(func)
+   self.press = func
    return self
 end
 

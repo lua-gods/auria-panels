@@ -29,10 +29,20 @@ function methods:setText(text)
    return self
 end
 
+--- sets function that will be called when button is toggled, returns itself for chaining
+--- @param func function
+--- @return panelsElementText
+function methods:onToggle(func)
+   self.toggle = func
+   return self
+end
 
 -- press
 function api.press(obj)
    obj.toggled = not obj.toggled
+   if obj.toggle then
+      obj.toggle(obj.toggled, obj)
+   end
    panels.anim(obj, 'toggle', 20, function(time, _, _, tasks)
       local c4 = math.pi * 2 / 3
       time = 2 ^ (-10 * time) * math.sin((time * 10 - 0.75) * c4) + 1
