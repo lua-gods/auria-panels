@@ -1,3 +1,4 @@
+-- modelpart
 local panelsHud = models:newPart('panelshud', 'Hud'):pos(-2, -2)
 
 --- @class panelsApi
@@ -6,11 +7,21 @@ local pages = {}
 local currentPage = nil
 local elements = {}
 local needReload = false
-local selected = 1
-local selectedFull = 1
+local selected = 0
+local selectedFull = 0
 local animations = {}
 --- @class panelsElementDefault
 local defaultElementMethods = {}
+
+-- theme
+local theme = require(.....'.theme')
+theme.rgb = {}
+for i, v in pairs(theme) do
+   if type(v) == 'string' then
+      theme.rgb[i] = vectors.hexToRGB(v)
+   end
+end
+panelsApi.theme = theme
 
 --- @class panelsPage
 local pageApi = {elements = {}}
@@ -43,8 +54,8 @@ function panelsApi.setPage(page)
    panelsApi.reload()
    animations = {}
    -- change selected element
-   selected = 1
-   selectedFull = 1
+   selected = 0
+   selectedFull = 0
 end
 
 --- reload all panels elements
@@ -112,18 +123,19 @@ end
 for _, file in pairs(listFiles(..., false)) do
    if not file:match('%.main$') then
       local name, api, getPanels = require(file)
-      --- @cast api table
-      for i, v in pairs(api.page) do
-         pageApi[i] = v
+      if type(name) == 'string' and type(api) == 'table' then
+         for i, v in pairs(api.page) do
+            pageApi[i] = v
+         end
+         -- give panels to element
+         getPanels(panelsApi)
+         -- create meatable
+         local metatable = {
+            __index = function(t, i) return api.methods[i] or defaultElementMethods[i] end
+         }
+         api.metatable = metatable
+         elements[name] = api
       end
-      -- give panels to element
-      getPanels(panelsApi)
-      -- create meatable
-      local metatable = {
-         __index = function(t, i) return api.methods[i] or defaultElementMethods[i] end
-      }
-      api.metatable = metatable
-      elements[name] = api
    end
 end
 
@@ -133,21 +145,30 @@ local panelsClick = keybinds:newKeybind('panels - click', 'key.mouse.left')
 panelsClick.press = function()
    if not currentPage then return end
    local obj = currentPage.elements[selectedFull]
-   if elements[obj.type].press then
+   if obj and elements[obj.type].press then
       elements[obj.type].press(obj)
-      panelsApi.reload()
    end
+   panelsApi.reload()
    return true
 end
 
+panelsClick.release = panelsApi.reload
+
 function events.mouse_scroll(dir)
    if not currentPage then return end
-   local oldSelectedFull = math.round(selected)
-   selected = selected - dir
-   selected = math.clamp(selected, 1, #currentPage.elements)
-   selectedFull = math.round(selected)
-   if oldSelectedFull ~= selectedFull then
-      panelsApi.reload()
+   if panelsClick:isPressed() then
+      local obj = currentPage.elements[selectedFull]
+      if obj and elements[obj.type].scroll then
+         elements[obj.type].scroll(obj, dir)
+      end
+   else
+      local oldSelectedFull = math.round(selected)
+      selected = selected - dir
+      selected = math.clamp(selected, 1, #currentPage.elements)
+      selectedFull = math.round(selected)
+      if oldSelectedFull ~= selectedFull then
+         panelsApi.reload()
+      end
    end
    return true
 end
@@ -171,7 +192,7 @@ function events.tick()
 end
 
 local function updateElement(i, v)
-   return elements[v.type].renderElement(v, i == selectedFull, v.model, v.model:getTask())
+   return elements[v.type].renderElement(v, i == selectedFull, i == selectedFull and panelsClick:isPressed(), v.model, v.model:getTask())
 end
 
 function events.world_render(delta)
@@ -186,7 +207,7 @@ function events.world_render(delta)
                v.model = panelsHud:newPart('element')
                elements[v.type].createModel(v.model)
             end
-            v.model:setPos(- v.pos.xy_ - vec(0, height, 0))
+            v.model:setPos(-v.pos.x, - v.pos.y - height, i == selectedFull and -10 or 0)
             v.model:setScale(v.size.x, v.size.y, 1)
             local heightOffset = updateElement(i, v)
             height = height + heightOffset * v.size.y

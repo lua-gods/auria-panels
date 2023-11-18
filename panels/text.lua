@@ -30,10 +30,11 @@ function api.createModel(model)
    model:newText('text'):setOutline(true)
 end
 
-function api.renderElement(data, isSelected, model, tasks)
+function api.renderElement(data, isSelected, isPressed, model, tasks)
+   local color = isPressed and panels.theme.pressed or isSelected and panels.theme.selected or panels.theme.default
    local text = toJson({
       text = data.text,
-      color = isSelected and 'white' or 'gray'
+      color = color
    })
    tasks.text:setText(text)
    return 10

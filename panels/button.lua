@@ -33,7 +33,7 @@ end
 -- press
 function api.press(obj)
    obj.toggled = not obj.toggled
-   panels.anim(obj, 'toggle', 10, function(time, _, _, tasks)
+   panels.anim(obj, 'toggle', 20, function(time, _, _, tasks)
       local c4 = math.pi * 2 / 3
       time = 2 ^ (-10 * time) * math.sin((time * 10 - 0.75) * c4) + 1
       if obj.toggled then
@@ -51,9 +51,9 @@ function api.createModel(model)
    model:newText('toggleRight'):setOutline(true):setPos(-10, 0, 2)
 end
 
-function api.renderElement(data, isSelected, model, tasks)
+function api.renderElement(data, isSelected, isPressed, model, tasks)
    -- text
-   local selectColor = isSelected and 'white' or 'gray'
+   local selectColor = isPressed and panels.theme.pressed or isSelected and panels.theme.selected or panels.theme.default
    local text = toJson({
       text = data.text,
       color = selectColor
@@ -61,8 +61,7 @@ function api.renderElement(data, isSelected, model, tasks)
    tasks.text:setText(text)
    tasks.toggle:setText('{"text":"[]","color":"'..selectColor..'"}')
    -- toggle
-   local toggleColor = data.toggled and enabledColor or disabledColor
-   toggleColor = '#' .. vectors.rgbToHex(toggleColor)
+   local toggleColor = data.toggled and panels.theme.on or panels.theme.off
    tasks.toggleLeft:setText('{"text":"[","color":"'..toggleColor..'"}')
    tasks.toggleRight:setText('{"text":"]","color":"'..toggleColor..'"}')
    tasks.toggle:setPos(data.toggled and -4 or -2, 0, 0)
