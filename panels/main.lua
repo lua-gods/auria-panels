@@ -9,6 +9,7 @@ local elements = {}
 local needReload = false
 local selected = 0
 local selectedFull = 0
+local panelsEnabled = false
 local animations = {}
 --- @class panelsElementDefault
 local defaultElementMethods = {}
@@ -104,6 +105,7 @@ function defaultElementMethods:setPos(x, y)
    else
       self.pos = vec(x, y)
    end
+   panelsApi.reload()
    return self
 end
 
@@ -116,6 +118,7 @@ function defaultElementMethods:setSize(x, y)
    else
       self.size = vec(x, y)
    end
+   panelsApi.reload()
    return self
 end
 
@@ -140,10 +143,11 @@ for _, file in pairs(listFiles(..., false)) do
 end
 
 -- controls
+-- click
 local panelsClick = keybinds:newKeybind('panels - click', 'key.mouse.left')
 
 panelsClick.press = function()
-   if not currentPage then return end
+   if not panelsEnabled or not currentPage then return end
    local obj = currentPage.elements[selectedFull]
    if obj and elements[obj.type].press then
       elements[obj.type].press(obj)
@@ -154,8 +158,9 @@ end
 
 panelsClick.release = panelsApi.reload
 
+-- scroll
 function events.mouse_scroll(dir)
-   if not currentPage then return end
+   if not panelsEnabled or not currentPage then return end
    if panelsClick:isPressed() then
       local obj = currentPage.elements[selectedFull]
       if obj and elements[obj.type].scroll then
@@ -170,6 +175,15 @@ function events.mouse_scroll(dir)
          panelsApi.reload()
       end
    end
+   return true
+end
+
+-- toggle panels
+local f3 = keybinds:newKeybind('panels - f3', 'key.keyboard.f3')
+local panelsToggle = keybinds:fromVanilla('figura.config.action_wheel_button')
+panelsToggle.press = function()
+   if f3:isPressed() then return end
+   panelsEnabled = not panelsEnabled
    return true
 end
 
@@ -196,6 +210,7 @@ local function updateElement(i, v)
 end
 
 function events.world_render(delta)
+   panelsHud:setVisible(panelsEnabled)
    if needReload then
       needReload = false
       
