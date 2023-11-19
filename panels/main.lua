@@ -192,7 +192,7 @@ end
 -- rendering
 function events.tick()
    panelsOldEnableTime = panelsEnableTime
-   panelsEnableTime = math.clamp(panelsEnableTime + (panelsEnabled and 0.1 or -0.1), 0, 1)
+   panelsEnableTime = math.clamp(panelsEnableTime + (panelsEnabled and 0.25 or -0.25), 0, 1)
    for i, v in pairs(animations) do
       local haveAnimations = false
       for i2, v2 in pairs(v) do
@@ -215,7 +215,10 @@ end
 
 function events.world_render(delta)
    local panelsTime = math.lerp(panelsOldEnableTime, panelsEnableTime, delta)
-   panelsHud:setMatrix(matrices.mat4():rotate(0, 0, 45):scale((panelsTime) ^ 3, 1, 1):rotate(0, 0, -45))
+   local panelsPos = client:getScaledWindowSize() * vec(0.5, 1)
+   panelsPos.x = panelsPos.x + 95
+   panelsPos.y = panelsPos.y + 8 - (1 - (1 - panelsTime) ^ 3) * 10
+   panelsHud:setPos(-panelsPos.xy_)
    panelsHud:setVisible(panelsTime > 0)
    if needReload and panelsTime > 0 then
       needReload = false
@@ -223,15 +226,16 @@ function events.world_render(delta)
       panelsHud:removeTask()
       if currentPage then
          local height = 0
-         for i, v in pairs(currentPage.elements) do
+         for i = #currentPage.elements, 1, -1 do
+            local v = currentPage.elements[i]
             if not v.model then
                v.model = panelsHud:newPart('element')
                elements[v.type].createModel(v.model)
             end
-            v.model:setPos(-v.pos.x, - v.pos.y - height, i == selectedFull and -10 or 0)
-            v.model:setScale(v.size.x, v.size.y, 1)
             local heightOffset = updateElement(i, v)
             height = height + heightOffset * v.size.y
+            v.model:setPos(-v.pos.x, height - v.pos.y, i == selectedFull and -10 or 0)
+            v.model:setScale(v.size.x, v.size.y, 1)
          end
       end
    end
