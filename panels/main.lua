@@ -10,6 +10,7 @@ local needReload = false
 local selected = 0
 local selectedFull = 0
 local panelsEnabled = false
+local panelsEnableTime, panelsOldEnableTime = 0, 0
 local animations = {}
 --- @class panelsElementDefault
 local defaultElementMethods = {}
@@ -189,6 +190,8 @@ end
 
 -- rendering
 function events.tick()
+   panelsOldEnableTime = panelsEnableTime
+   panelsEnableTime = math.clamp(panelsEnableTime + (panelsEnabled and 0.1 or -0.1), 0, 1)
    for i, v in pairs(animations) do
       local haveAnimations = false
       for i2, v2 in pairs(v) do
@@ -210,8 +213,10 @@ local function updateElement(i, v)
 end
 
 function events.world_render(delta)
-   panelsHud:setVisible(panelsEnabled)
-   if needReload then
+   local panelsTime = math.lerp(panelsOldEnableTime, panelsEnableTime, delta)
+   panelsHud:setMatrix(matrices.mat4():rotate(0, 0, 45):scale((panelsTime) ^ 3, 1, 1):rotate(0, 0, -45))
+   panelsHud:setVisible(panelsTime > 0)
+   if needReload and panelsTime > 0 then
       needReload = false
       
       panelsHud:removeTask()

@@ -5,13 +5,13 @@ local disabledColor = vec(0.99, 0.33, 0.33)
 local myPageApi = {}
 --- @class panelsApi 
 local panels = {}
---- @class panelsElementText : panelsElementDefault
+--- @class panelsElementButton : panelsElementDefault
 local methods = {}
 local api = {page = myPageApi, methods = methods}
 
 --- creates new panels text element
 --- @param self panelsPage
---- @return table
+--- @return panelsElementButton
 function myPageApi:newButton()
    local obj = panels.newElement('button', self)
    obj.text = ''
@@ -22,7 +22,7 @@ end
 -- methods
 --- set text of text element, returns itself for chaining
 --- @param text string
---- @return panelsElementText
+--- @return panelsElementButton
 function methods:setText(text)
    self.text = text
    panels.reload()
@@ -31,7 +31,7 @@ end
 
 --- sets function that will be called when button is toggled, returns itself for chaining
 --- @param func function
---- @return panelsElementText
+--- @return panelsElementButton
 function methods:onToggle(func)
    self.toggle = func
    return self
