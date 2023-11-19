@@ -21,8 +21,8 @@ end
 
 -- methods
 --- set text of text element, returns itself for chaining
---- @param text string
---- @return panelsElementButton
+--- @overload fun(self: panelsElementButton, text: string): panelsElementButton
+--- @overload fun(self: panelsElementButton, text: table): panelsElementButton
 function methods:setText(text)
    self.text = text
    panels.reload()
@@ -65,8 +65,9 @@ function api.renderElement(data, isSelected, isPressed, model, tasks)
    -- text
    local selectColor = isPressed and panels.theme.pressed or isSelected and panels.theme.selected or panels.theme.default
    local text = toJson({
-      text = data.text,
-      color = selectColor
+      text = '',
+      color = selectColor,
+      extra = {data.text}
    })
    tasks.text:setText(text)
    tasks.toggle:setText('{"text":"[]","color":"'..selectColor..'"}')

@@ -146,27 +146,57 @@ end
 
 -- controls
 -- click
-local panelsClick = keybinds:newKeybind('panels - click', 'key.mouse.left')
+-- local panelsClick = keybinds:newKeybind('panels - click', 'key.mouse.left')
 
+-- panelsClick.press = function()
+--    if not panelsEnabled or not currentPage then return end
+--    local obj = currentPage.elements[selectedFull]
+--    if obj and elements[obj.type].press then
+--       elements[obj.type].press(obj)
+--    end
+--    panelsApi.reload()
+--    return true
+-- end
+
+-- panelsClick.release = panelsApi.reload
+
+-- open panel, click
+local f3 = keybinds:newKeybind('panels - f3', 'key.keyboard.f3') -- prevent overriding f3 keybinds
+local panelsClick = keybinds:fromVanilla('figura.config.action_wheel_button')
 panelsClick.press = function()
-   if not panelsEnabled or not currentPage then return end
-   local obj = currentPage.elements[selectedFull]
-   if obj and elements[obj.type].press then
-      elements[obj.type].press(obj)
+   if f3:isPressed() then return end
+   if not currentPage then return end
+   if panelsEnabled then
+      local obj = currentPage.elements[selectedFull]
+      if obj and elements[obj.type].press then
+         elements[obj.type].press(obj)
+      end
+      panelsApi.reload()
+   else
+      panelsEnabled = true
    end
-   panelsApi.reload()
    return true
 end
 
 panelsClick.release = panelsApi.reload
 
+-- close panel
+local escKey = keybinds:newKeybind('panels - close', 'key.keyboard.escape')
+escKey.press = function()
+   if panelsEnabled then
+      panelsEnabled = false
+      return true
+   end
+end
+
 -- scroll
 function events.mouse_scroll(dir)
-   if not panelsEnabled or not currentPage then return end
+   if not panelsEnabled or not currentPage or host:getScreen() then return end
    if panelsClick:isPressed() then
       local obj = currentPage.elements[selectedFull]
       if obj and elements[obj.type].scroll then
          elements[obj.type].scroll(obj, dir)
+         panelsApi.reload()
       end
    else
       local oldSelectedFull = math.round(selected)
@@ -177,15 +207,6 @@ function events.mouse_scroll(dir)
          panelsApi.reload()
       end
    end
-   return true
-end
-
--- toggle panels
-local f3 = keybinds:newKeybind('panels - f3', 'key.keyboard.f3')
-local panelsToggle = keybinds:fromVanilla('figura.config.action_wheel_button')
-panelsToggle.press = function()
-   if f3:isPressed() then return end
-   panelsEnabled = not panelsEnabled
    return true
 end
 
