@@ -1,5 +1,5 @@
 -- modelpart
-local panelsHud = models:newPart('panelshud', 'Hud'):pos(-2, -2)
+local panelsHud = models:newPart('panelshud', 'Hud')
 
 --- @class panelsApi
 local panelsApi = {}
@@ -49,6 +49,7 @@ function panelsApi.setPage(page)
    if currentPage then
       for i, v in pairs(currentPage.elements) do
          panelsHud:removeChild(v.model)
+         v.model = nil
       end
    end
    -- set page
