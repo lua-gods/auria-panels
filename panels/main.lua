@@ -1,5 +1,5 @@
 -- modelpart
-local panelsHud = models:newPart('panelshud', 'Hud')
+local panelsHud = models:newPart('panelsHud', 'Hud')
 
 --- @class panelsApi
 local panelsApi = {}
@@ -145,21 +145,6 @@ for _, file in pairs(listFiles(..., false)) do
 end
 
 -- controls
--- click
--- local panelsClick = keybinds:newKeybind('panels - click', 'key.mouse.left')
-
--- panelsClick.press = function()
---    if not panelsEnabled or not currentPage then return end
---    local obj = currentPage.elements[selectedFull]
---    if obj and elements[obj.type].press then
---       elements[obj.type].press(obj)
---    end
---    panelsApi.reload()
---    return true
--- end
-
--- panelsClick.release = panelsApi.reload
-
 -- open panel, click
 local f3 = keybinds:newKeybind('panels - f3', 'key.keyboard.f3') -- prevent overriding f3 keybinds
 local panelsClick = keybinds:fromVanilla('figura.config.action_wheel_button')
