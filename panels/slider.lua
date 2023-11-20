@@ -16,9 +16,9 @@ local sliderLen = 34
 function myPageApi:newSlider()
    local obj = panels.newElement('slider', self)
    obj.text = ''
-   obj.value = 0
-   obj.min = 1032
-   obj.max = 1064
+   obj.value = 1000
+   obj.min = 1000
+   obj.max = 1032
    obj.color = vec(0.98, 0.65, 0.78)
    return obj
 end
