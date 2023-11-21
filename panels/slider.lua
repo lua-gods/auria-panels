@@ -16,22 +16,34 @@ local sliderLen = 34
 function myPageApi:newSlider()
    local obj = panels.newElement('slider', self)
    obj.text = ''
-   obj.value = 1000
-   obj.min = 1000
-   obj.max = 1032
+   obj.value = 0
+   obj.min = 0
+   obj.max = 16
    obj.color = vec(0.98, 0.65, 0.78)
+   obj.step = 1
+   obj.preciseStep = nil
+   obj.warp = false
+   obj.scrollOffset = 0
    return obj
 end
 
-function api.scroll(obj, dir)
-   obj.value = math.clamp(obj.value + dir, obj.min, obj.max)
+function api.scroll(obj, dir, shift)
+   dir = dir + obj.scrollOffset
+   obj.scrollOffset = dir % 1
+   dir = math.floor(dir)
+   obj.value = obj.value + dir * (shift and obj.preciseStep or obj.step)
+   if obj.warp then
+      obj.value = (obj.value - obj.min) % (obj.max - obj.min) + obj.min
+   else
+      obj.value = math.clamp(obj.value, obj.min, obj.max)
+   end
    if obj.scroll then
-      obj.scroll(dir)
+      obj.scroll(obj.value, obj)
    end
 end
 
 -- methods
---- set text of text element, returns itself for chaining
+--- set text of slider, returns itself for chaining
 --- @overload fun(self: panelsElementSlider, text: string): panelsElementSlider
 --- @overload fun(self: panelsElementSlider, text: table): panelsElementSlider
 function methods:setText(text)
@@ -39,6 +51,62 @@ function methods:setText(text)
    panels.reload()
    return self
 end
+
+--- sets color of slider, returns itself for chaining
+--- @overload fun(self: panelsElementSlider, r: number, g: number, b: number): panelsElementSlider
+--- @overload fun(self: panelsElementSlider, color: Vector3): panelsElementSlider
+function methods:setColor(r, g, b)
+   if type(r) == 'Vector3' then
+      self.color = r 
+   else
+      self.color = vec(r, g, b) 
+   end
+   panels.reload()
+   return self
+end
+
+--- sets minimum for slider, returns itself for chaining
+--- @overload fun(self: panelsElementSlider, min: number): panelsElementSlider
+function methods:setMin(min)
+   self.min = min
+   self.value = math.max(self.value, min)
+   panels.reload()
+   return self
+end
+
+--- sets maximum for slider, returns itself for chaining
+--- @overload fun(self: panelsElementSlider, max: number): panelsElementSlider
+function methods:setMax(max)
+   self.max = max
+   self.value = math.min(self.value, max)
+   panels.reload()
+   return self
+end
+
+--- sets current value for slider, returns itself for chaining
+--- @overload fun(self: panelsElementSlider, value: number): panelsElementSlider
+function methods:setValue(value)
+   self.value = math.clamp(value, self.min, self.max)
+   panels.reload()
+   return self
+end
+
+--- sets step size for slider, optional argument for precise step that will be used instead of step when shift is held, returns itself for chaining
+--- @overload fun(self: panelsElementSlider, step: number): panelsElementSlider
+--- @overload fun(self: panelsElementSlider, step: number, precise: number): panelsElementSlider
+function methods:setStep(step, precise)
+   self.step = step 
+   self.preciseStep = precise
+   return self
+end
+
+--- makes slider value loop around, returns itself for chaining
+--- @overload fun(self: panelsElementSlider, warp: boolean): panelsElementSlider
+function methods:allowWarping(warp)
+   self.warp = warp
+   return self
+end
+
 
 --- sets function that will be called when scrolling
 --- @param func function

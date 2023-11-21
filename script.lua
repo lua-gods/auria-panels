@@ -12,7 +12,7 @@ page:newButton():setText({text = '△', font = 'figura:badges'})
 page:newButton():setText('hello | off'):onToggle(function(toggled, self) self:setText(toggled and 'hello | on' or 'hello | off') end)
 page:newText():setText('world'):setPos(20, 0)
 
-page:newSlider():setText('slider')
+page:newSlider():setText('hue'):setMax(360):setValue(0):setStep(10, 1):allowWarping(true):onScroll(function(value, self) self:setColor(vectors.hsvToRGB(value / 360, 1, 1)) end)
 
 page:newText():setText({text = ':cat: cat', color = '#ed773b'}):onPress(function(self) self:setText({text = ':cat: meow', color = '#fcc64f'}) end)
 

@@ -165,6 +165,14 @@ end
 
 panelsClick.release = panelsApi.reload
 
+-- shift
+local shift = keybinds:newKeybind('panels - shift', 'key.keyboard.left.shift')
+shift.press = function()
+   if panelsEnabled and currentPage then
+      return panelsClick:isPressed()
+   end
+end
+
 -- close panel
 local escKey = keybinds:newKeybind('panels - close', 'key.keyboard.escape')
 escKey.press = function()
@@ -180,7 +188,7 @@ function events.mouse_scroll(dir)
    if panelsClick:isPressed() then
       local obj = currentPage.elements[selectedFull]
       if obj and elements[obj.type].scroll then
-         elements[obj.type].scroll(obj, dir)
+         elements[obj.type].scroll(obj, dir, shift:isPressed())
          panelsApi.reload()
       end
    else
