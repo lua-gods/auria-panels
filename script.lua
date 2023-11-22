@@ -1,6 +1,6 @@
 local panels = require('panels.main')
 
-local page = panels.newPage()
+local page = panels.newPage('main')
 
 panels.setPage(page)
 
@@ -22,8 +22,11 @@ local page2 = panels.newPage('test')
 
 page2:newButton():setText('button1')
 page2:newButton():setText('button2')
+page2:clear()
 page2:newButton():setText('button3')
 page2:newButton():setText('button4')
 page2:newButton():setText('button5')
+
+page2:removeElement(5)
 
 page2:newReturnButton()

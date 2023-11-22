@@ -36,7 +36,9 @@ function panelsApi.newPage(name)
    local page = {
       elements = {}
    }
-   pages[name or #pages+1] = page
+   if name then
+      pages[name] = page
+   end
    setmetatable(page, pageMetatable)
    return page
 end
@@ -64,6 +66,13 @@ function panelsApi.setPage(page, keepHistory)
       panelsApi.history = {}
    end
    table.insert(panelsApi.history, page)
+end
+
+--- gets created page with specific name, returns nil if doesnt exist
+--- @param name string
+--- @return panelsPage?
+function panelsApi.getPage(name)
+   return pages[name]
 end
 
 --- reload all panels elements
@@ -101,6 +110,28 @@ function panelsApi.newElement(name, page)
    table.insert(page.elements, obj)
    panelsApi.reload()
    return obj
+end
+
+
+--- removes element from page 
+--- @param i number
+function pageApi:removeElement(i)
+   if not self.elements[i] then return end
+   if self.elements[i].model then
+      panelsHud:removeChild(self.elements[i].model)
+      panelsApi.reload()
+   end
+   table.remove(self.elements, i)
+end
+
+--- removes all elements from page
+function pageApi:clear()
+   if currentPage == self then
+      for i, v in pairs(self.elements) do
+         panelsHud:removeChild(v.model)
+      end
+   end
+   self.elements = {}
 end
 
 --- sets pos of element, returns itself for self chaining
