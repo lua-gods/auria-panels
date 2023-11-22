@@ -25,7 +25,7 @@ page2:newButton():setText('button2')
 page2:clear()
 page2:newButton():setText('button3')
 page2:newButton():setText('button4')
-page2:newButton():setText('button5')
+page2:newButton():setText('button5'):setToggled(true)
 
 page2:removeElement(5)
 

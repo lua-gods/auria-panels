@@ -37,6 +37,14 @@ function methods:onToggle(func)
    return self
 end
 
+--- set if button should be on or off, returns itself for chaining
+--- @param toggle boolean
+--- @return panelsElementButton
+function methods:setToggled(toggle)
+   self.toggled = toggle
+   return self
+end
+
 -- press
 function api.press(obj)
    obj.toggled = not obj.toggled
