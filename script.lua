@@ -27,6 +27,8 @@ page2:newButton():setText('button3')
 page2:newButton():setText('button4')
 page2:newButton():setText('button5'):setToggled(true)
 
+page2:newSlider():setRange(10, 30)
+
 page2:removeElement(5)
 
 page2:newReturnButton()

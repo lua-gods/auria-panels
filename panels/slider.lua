@@ -83,6 +83,16 @@ function methods:setMax(max)
    return self
 end
 
+--- sets sliding range, returns itself for chaining
+--- @overload fun(self: panelsElementSlider, min: number, max: number): panelsElementSlider
+function methods:setRange(min, max)
+   self.min = min
+   self.max = max
+   self.value = math.clamp(self.value, self.min, self.max)
+   panels.reload()
+   return self
+end
+
 --- sets current value for slider, returns itself for chaining
 --- @overload fun(self: panelsElementSlider, value: number): panelsElementSlider
 function methods:setValue(value)
