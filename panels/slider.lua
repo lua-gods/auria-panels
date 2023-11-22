@@ -141,8 +141,10 @@ function api.renderElement(data, isSelected, isPressed, model, tasks)
    tasks.slider:setColor(data.color):setScale(slider * sliderLen, 1, 1)
    tasks.sliderBg:setScale(sliderLen * (1 - slider), 1, 1):setPos(- slider * sliderLen, 0, 0)
    -- text
-   tasks.sliderText:setText(toJson({text = data.value, color = panels.theme.outline}))
-   tasks.sliderText2:setText(data.value)
+   local valueText = math.round(data.value * 10000) / 10000
+   valueText = tostring(valueText):sub(1, 6)
+   tasks.sliderText:setText(toJson({text = valueText, color = panels.theme.outline}))
+   tasks.sliderText2:setText(valueText)
 
    local mat = matrices.translate4(-1, 0, 2 / sliderLen - slider)
    mat.v31 = 1 / -sliderLen
