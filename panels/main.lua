@@ -2,7 +2,7 @@
 local panelsHud = models:newPart('panelsHud', 'Hud')
 
 --- @class panelsApi
-local panelsApi = {}
+local panelsApi = {history = {}}
 local pages = {}
 local currentPage = nil
 local elements = {}
@@ -42,9 +42,9 @@ function panelsApi.newPage(name)
 end
 
 --- sets panel page to the one provided, you can also use name of page instead 
---- @overload fun(page: panelsPage)
---- @overload fun(pageName: string)
-function panelsApi.setPage(page)
+--- @overload fun(page: panelsPage, keepHistory: boolean?)
+--- @overload fun(pageName: string, keepHistory: boolean?)
+function panelsApi.setPage(page, keepHistory)
    -- remove all old parts
    if currentPage then
       for i, v in pairs(currentPage.elements) do
@@ -59,6 +59,11 @@ function panelsApi.setPage(page)
    -- change selected element
    selected = 0
    selectedFull = 0
+   -- update history
+   if not keepHistory then
+      panelsApi.history = {}
+   end
+   table.insert(panelsApi.history, page)
 end
 
 --- reload all panels elements

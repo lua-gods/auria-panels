@@ -17,7 +17,7 @@ end
 
 function api.press(obj)
    if obj.page then
-      panels.setPage(obj.page)
+      panels.setPage(obj.page, true)
    end
 end
 

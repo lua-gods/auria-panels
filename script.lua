@@ -26,4 +26,4 @@ page2:newButton():setText('button3')
 page2:newButton():setText('button4')
 page2:newButton():setText('button5')
 
-page2:newPageRedirect():setText('main'):setPage(page)
+page2:newReturnButton()

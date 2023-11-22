@@ -6,4 +6,7 @@ return {
    sliderBg = '#545454',
    on = '#54fb54',
    off = '#fb5454',
+   returnDefault = '#fc5454',
+   returnSelected = '#ffaaba',
+   returnPressed = '#884050'
 }
