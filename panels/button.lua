@@ -42,6 +42,7 @@ end
 --- @return panelsElementButton
 function methods:setToggled(toggle)
    self.toggled = toggle
+   panels.reload()
    return self
 end
 
