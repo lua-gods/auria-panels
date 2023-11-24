@@ -9,7 +9,7 @@ local panels = {}
 local methods = {}
 local api = {page = myPageApi, methods = methods}
 
---- creates new panels text element
+--- creates new panels button element
 --- @param self panelsPage
 --- @return panelsElementButton
 function myPageApi:newButton()
@@ -20,7 +20,7 @@ function myPageApi:newButton()
 end
 
 -- methods
---- set text of text element, returns itself for chaining
+--- set text of element, returns itself for chaining
 --- @overload fun(self: panelsElementButton, text: string): panelsElementButton
 --- @overload fun(self: panelsElementButton, text: table): panelsElementButton
 function methods:setText(text)
@@ -30,7 +30,7 @@ function methods:setText(text)
 end
 
 --- sets function that will be called when button is toggled, returns itself for chaining
---- @param func function
+--- @param func fun(toggled: boolean, obj: panelsElementButton)
 --- @return panelsElementButton
 function methods:onToggle(func)
    self.toggle = func

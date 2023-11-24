@@ -6,16 +6,26 @@ local panels = {}
 local methods = {}
 local api = {page = myPageApi, methods = methods}
 
---- creates new panels text element
+--- creates new panels return element
 --- @param self panelsPage
 --- @return panelsElementReturn
 function myPageApi:newReturnButton()
    return panels.newElement('return', self)
 end
 
-function api.press()
-   table.remove(panels.history)
-   panels.setPage(panels.history[#panels.history])
+function api.press(obj)
+   if obj.func then
+      obj.func(obj)
+   end
+   panels.previousPage()
+end
+
+--- sets function that will be called when returning to previous page, returns itself for chaining
+--- @param func fun(obj: panelsElementReturn)
+--- @return panelsElementReturn
+function methods:onReturn(func)
+   self.func = func
+   return self
 end
 
 -- rendering

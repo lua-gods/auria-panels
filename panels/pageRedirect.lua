@@ -6,7 +6,7 @@ local panels = {}
 local methods = {}
 local api = {page = myPageApi, methods = methods}
 
---- creates new panels text element
+--- creates new panels page redirect element
 --- @param self panelsPage
 --- @return panelsElementPageRedirect
 function myPageApi:newPageRedirect()
@@ -22,7 +22,7 @@ function api.press(obj)
 end
 
 -- methods
---- set text of text element, returns itself for chaining
+--- set text of element, returns itself for chaining
 --- @param text string
 --- @return panelsElementPageRedirect
 function methods:setText(text)

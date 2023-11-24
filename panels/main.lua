@@ -44,9 +44,9 @@ function panelsApi.newPage(name)
 end
 
 --- sets panel page to the one provided, you can also use name of page instead 
---- @overload fun(page: panelsPage, keepHistory: boolean?)
---- @overload fun(pageName: string, keepHistory: boolean?)
-function panelsApi.setPage(page, keepHistory)
+--- @overload fun(page: panelsPage, keepHistory: boolean?, dontAddToHistory: boolean?)
+--- @overload fun(pageName: string, keepHistory: boolean?, dontAddToHistory: boolean?)
+function panelsApi.setPage(page, keepHistory, dontAddToHistory)
    -- remove all old parts
    if currentPage then
       for i, v in pairs(currentPage.elements) do
@@ -65,7 +65,15 @@ function panelsApi.setPage(page, keepHistory)
    if not keepHistory then
       panelsApi.history = {}
    end
-   table.insert(panelsApi.history, page)
+   if not dontAddToHistory then
+      table.insert(panelsApi.history, page)
+   end
+end
+
+--- goes to previous page
+function panelsApi.previousPage()
+   table.remove(panelsApi.history)
+   panelsApi.setPage(panelsApi.history[#panelsApi.history], true, true)
 end
 
 --- gets created page with specific name, returns nil if doesnt exist
@@ -73,6 +81,12 @@ end
 --- @return panelsPage?
 function panelsApi.getPage(name)
    return pages[name]
+end
+
+--- returns currently opened page
+--- @return panelsPage?
+function panelsApi.getCurrentPage(name)
+   return currentPage
 end
 
 --- reload all panels elements
@@ -84,7 +98,7 @@ end
 --- @param obj any
 --- @param name string
 --- @param duration number
---- @param func function
+--- @param func fun(time: number, obj: panelsElementDefault, model: ModelPart, tasks: table<string, RenderTask>)
 function panelsApi.anim(obj, name, duration, func)
    if not animations[obj] then
       animations[obj] = {}

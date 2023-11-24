@@ -16,6 +16,9 @@ page:newSlider():setText('hue'):setMax(360):setValue(0):setStep(10, 1):allowWarp
 
 page:newText():setText({text = ':cat: cat', color = '#ed773b'}):onPress(function(self) self:setText({text = ':cat: meow', color = '#fcc64f'}) end)
 
+page:newColorPicker():setText('meow'):onColorChange(function(a, b) print(a) end)
+
+
 page:newPageRedirect():setText('test'):setPage('test')
 
 local page2 = panels.newPage('test')
@@ -30,5 +33,11 @@ page2:newButton():setText('button5'):setToggled(true)
 page2:newSlider():setRange(10, 30)
 
 page2:removeElement(5)
+
+local page3 = panels.newPage('mrrooww')
+page3:newText():setText('mrrowww')
+
+page3:newReturnButton()
+page2:newPageRedirect():setPage(page3):setText('mrow')
 
 page2:newReturnButton()

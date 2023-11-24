@@ -17,12 +17,12 @@ end
 
 function api.press(obj)
    if obj.press then
-      obj:press()
+      obj:press(obj)
    end
 end
 
 -- methods
---- set text of text element, returns itself for chaining
+--- set text of element, returns itself for chaining
 --- @overload fun(self: panelsElementText, text: string): panelsElementText
 --- @overload fun(self: panelsElementText, text: table): panelsElementText
 function methods:setText(text)
@@ -32,7 +32,7 @@ function methods:setText(text)
 end
 
 --- sets function that will be called when text is pressed, returns itself for chaining
---- @param func function
+--- @param func fun(obj: panelsElementText)
 --- @return panelsElementText
 function methods:onPress(func)
    self.press = func

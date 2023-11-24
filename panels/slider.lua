@@ -10,7 +10,7 @@ local whitePixel = textures.whitePixel or textures:newTexture('whitePixel', 1, 1
 
 local sliderLen = 34
 
---- creates new panels text element
+--- creates new panels slider element
 --- @param self panelsPage
 --- @return panelsElementSlider
 function myPageApi:newSlider()
@@ -119,7 +119,7 @@ end
 
 
 --- sets function that will be called when scrolling
---- @param func function
+--- @param func fun(value: number, obj: panelsElementSlider)
 --- @return panelsElementSlider
 function methods:onScroll(func)
    self.scroll = func
