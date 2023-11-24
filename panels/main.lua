@@ -55,19 +55,17 @@ function panelsApi.setPage(page, keepHistory, dontAddToHistory)
       end
    end
    -- set page
-   currentPage = pages[page] or page
+   currentPage = pages[page] or page --- @cast currentPage panelsPage
    panelsApi.reload()
    animations = {}
    -- change selected element
    selected = 0
    selectedFull = 0
    -- update history
-   if not keepHistory then
-      panelsApi.history = {}
-   end
-   if not dontAddToHistory then
-      table.insert(panelsApi.history, page)
-   end
+   if not keepHistory then panelsApi.history = {} end
+   if not dontAddToHistory then table.insert(panelsApi.history, page) end
+   -- on open
+   if currentPage.openFunc then currentPage.openFunc(currentPage) end
 end
 
 --- goes to previous page
@@ -85,7 +83,7 @@ end
 
 --- returns currently opened page
 --- @return panelsPage?
-function panelsApi.getCurrentPage(name)
+function panelsApi.getCurrentPage()
    return currentPage
 end
 
@@ -136,6 +134,7 @@ function pageApi:removeElement(i)
       panelsApi.reload()
    end
    table.remove(self.elements, i)
+   return self
 end
 
 --- removes all elements from page
@@ -146,6 +145,15 @@ function pageApi:clear()
       end
    end
    self.elements = {}
+   return self
+end
+
+--- function called when page is open
+--- @param func fun(page: panelsPage)?
+--- @return panelsPage
+function pageApi:onOpen(func)
+   self.openFunc = func
+   return self
 end
 
 --- sets pos of element, returns itself for self chaining
