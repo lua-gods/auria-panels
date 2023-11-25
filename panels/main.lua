@@ -93,7 +93,7 @@ function panelsApi.reload()
 end
 
 --- plays animation requires panel element, animation name, duration and function
---- @param obj any
+--- @param obj panelsElementDefault
 --- @param name string
 --- @param duration number
 --- @param func fun(time: number, obj: panelsElementDefault, model: ModelPart, tasks: table<string, RenderTask>)
