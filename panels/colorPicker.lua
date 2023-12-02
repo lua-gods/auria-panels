@@ -10,10 +10,19 @@ local whitePixel = textures.whitePixel or textures:newTexture('whitePixel', 1, 1
 -- page
 local page, currentColor, updateElements, colorPickerObj
 local function pageInit()
+   local function updateColor()
+      if currentColor ~= colorPickerObj.color then
+         colorPickerObj.color = currentColor
+         if colorPickerObj.func then
+            colorPickerObj.func(currentColor, colorPickerObj)
+         end
+      end
+   end
+
    page = panels.newPage()
    local colorPresetsPage = panels.newPage()
 
-   local colorPreview = page:newColorPicker():setEnabled(false)
+   local colorPreview = page:newColorPicker():setEnabled(false):onPress(updateColor)
 
    local red = page:newSlider():setRange(0, 255):setStep(16, 1):setText('red')
    local green = page:newSlider():setRange(0, 255):setStep(16, 1):setText('green')
@@ -30,12 +39,7 @@ local function pageInit()
 
    page:newPageRedirect():setText('presets'):setPage(colorPresetsPage)
 
-   page:newReturnButton():onReturn(function()
-      colorPickerObj.color = currentColor
-      if colorPickerObj.func then
-         colorPickerObj.func(currentColor, colorPickerObj)
-      end
-   end)
+   page:newReturnButton():onReturn(updateColor)
 
    function updateElements()
       colorPreview:setColor(currentColor):setText('#' .. vectors.rgbToHex(currentColor))
@@ -71,6 +75,7 @@ local function pageInit()
       colorPresetsPage:newColorPicker():setEnabled(false):setColor(color):setText(v[2]):onPress(function()
          currentColor = color
          updateElements()
+         updateColor()
          panels.previousPage()
       end)
    end

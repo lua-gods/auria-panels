@@ -1,3 +1,6 @@
+-- load theme
+local theme = require(.....'.theme')
+
 -- modelpart
 local panelsHud = models:newPart('panelsHud', 'Hud')
 
@@ -15,8 +18,7 @@ local animations = {}
 --- @class panelsElementDefault
 local defaultElementMethods = {}
 
--- theme
-local theme = require(.....'.theme')
+-- generate rgb colors for theme
 theme.rgb = {}
 for i, v in pairs(theme) do
    if type(v) == 'string' then
@@ -50,8 +52,8 @@ function panelsApi.setPage(page, keepHistory, dontAddToHistory)
    -- remove all old parts
    if currentPage then
       for i, v in pairs(currentPage.elements) do
-         panelsHud:removeChild(v.model)
-         v.model = nil
+         panelsHud:removeChild(v.renderData.model)
+         v.renderData = nil
       end
    end
    -- set page
@@ -129,8 +131,8 @@ end
 --- @param i number
 function pageApi:removeElement(i)
    if not self.elements[i] then return end
-   if self.elements[i].model then
-      panelsHud:removeChild(self.elements[i].model)
+   if self.elements[i].renderData.model then
+      panelsHud:removeChild(self.elements[i].renderData.model)
       panelsApi.reload()
    end
    table.remove(self.elements, i)
@@ -141,7 +143,7 @@ end
 function pageApi:clear()
    if currentPage == self then
       for i, v in pairs(self.elements) do
-         panelsHud:removeChild(v.model)
+         panelsHud:removeChild(v.renderData.model)
       end
    end
    self.elements = {}
@@ -203,6 +205,39 @@ for _, file in pairs(listFiles(..., false)) do
 end
 
 -- controls
+local function selectElementAnim(time, obj, model, tasks)
+   -- easing
+   local c1, c3 = 1.7, 2.7
+   time = 1 + c3 * (time - 1) ^ 3 + c1 * (time - 1) ^ 2
+   -- apply animation
+   obj.renderData.selectOffset = time * -4
+   model:setPos(obj.renderData.renderedPos + vec(obj.renderData.selectOffset, 0, 0))
+end
+
+local function unselectElementAnim(time, obj, model, tasks)
+   -- easing
+   local c1, c3 = 1.7, 2.7
+   time = 1 + c3 * (time - 1) ^ 3 + c1 * (time - 1) ^ 2
+   -- apply animation
+   obj.renderData.selectOffset = time * 4 - 4
+   model:setPos(obj.renderData.renderedPos + vec(obj.renderData.selectOffset, 0, 0))
+end
+
+local function setSelected(new)
+   local oldSelectedFull = selectedFull
+   selected = math.clamp(new, 1, #currentPage.elements)
+   selectedFull = math.round(selected)
+   if oldSelectedFull ~= selectedFull then
+      panelsApi.reload()
+      -- unselect
+      if currentPage.elements[oldSelectedFull] then
+         panelsApi.anim(currentPage.elements[oldSelectedFull], 'selectElementAnim', 6, unselectElementAnim)
+      end
+      -- select
+      panelsApi.anim(currentPage.elements[selectedFull], 'selectElementAnim', 6, selectElementAnim)
+   end
+end
+
 -- open panel, click
 local f3 = keybinds:newKeybind('panels - f3', 'key.keyboard.f3') -- prevent overriding f3 keybinds
 local panelsClick = keybinds:fromVanilla('figura.config.action_wheel_button')
@@ -250,13 +285,7 @@ function events.mouse_scroll(dir)
          panelsApi.reload()
       end
    else
-      local oldSelectedFull = math.round(selected)
-      selected = selected - dir
-      selected = math.clamp(selected, 1, #currentPage.elements)
-      selectedFull = math.round(selected)
-      if oldSelectedFull ~= selectedFull then
-         panelsApi.reload()
-      end
+      setSelected(selected - dir)
    end
    return true
 end
@@ -282,7 +311,7 @@ function events.tick()
 end
 
 local function updateElement(i, v)
-   return elements[v.type].renderElement(v, i == selectedFull, i == selectedFull and panelsClick:isPressed(), v.model, v.model:getTask())
+   return elements[v.type].renderElement(v, i == selectedFull, i == selectedFull and panelsClick:isPressed(), v.renderData.model, v.renderData.model:getTask())
 end
 
 function events.world_render(delta)
@@ -300,14 +329,18 @@ function events.world_render(delta)
          local height = 0
          for i = #currentPage.elements, 1, -1 do
             local v = currentPage.elements[i]
-            if not v.model then
-               v.model = panelsHud:newPart('element')
-               elements[v.type].createModel(v.model)
+            if not v.renderData then
+               v.renderData = {
+                  model = panelsHud:newPart('element'),
+                  selectOffset = 0,
+               }
+               elements[v.type].createModel(v.renderData.model)
             end
             local heightOffset = updateElement(i, v)
             height = height + heightOffset * v.size.y
-            v.model:setPos(-v.pos.x, height - v.pos.y, i == selectedFull and -10 or 0)
-            v.model:setScale(v.size.x, v.size.y, 1)
+            v.renderData.renderedPos = vec(-v.pos.x, height - v.pos.y, i == selectedFull and -10 or 0)
+            v.renderData.model:setPos(v.renderData.renderedPos + vec(v.renderData.selectOffset, 0, 0))
+            v.renderData.model:setScale(v.size.x, v.size.y, 1)
          end
       end
    end
@@ -315,7 +348,7 @@ function events.world_render(delta)
    for obj, anims in pairs(animations) do
       for name, data in pairs(anims) do
          local time = math.min(data.time + delta, data.duration) / data.duration
-         data.func(time, obj, obj.model, obj.model:getTask())
+         data.func(time, obj, obj.renderData.model, obj.renderData.model:getTask())
       end
    end
 end
