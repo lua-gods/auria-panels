@@ -186,7 +186,7 @@ end
 
 -- load elements
 for _, file in pairs(listFiles(..., false)) do
-   if not file:match('%.main$') then
+   if not file:match('[./]main$') then
       local name, api, getPanels = require(file)
       if type(name) == 'string' and type(api) == 'table' then
          for i, v in pairs(api.page) do
