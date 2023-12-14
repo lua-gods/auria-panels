@@ -10,11 +10,13 @@ local pages = {}
 local currentPage = nil
 local elements = {}
 local needReload = false
-local selected = 0
-local selectedFull = 0
-local panelsEnabled = false
+local selected, selectedFull, selectedWithMouse = 0, 0, false
+local panelsEnabled = false or true
 local panelsEnableTime, panelsOldEnableTime = 0, 0
+local chatOffset, oldChatOffset = 0, 0
 local animations = {}
+local panelsPos = vec(0, 0)
+local oldMousePos, mousePos = vec(0, 0), vec(0, 0)
 --- @class panelsElementDefault
 local defaultElementMethods = {}
 
@@ -223,9 +225,10 @@ local function unselectElementAnim(time, obj, model, tasks)
    model:setPos(obj.renderData.renderedPos + vec(obj.renderData.selectOffset, 0, 0))
 end
 
-local function setSelected(new)
+local function setSelected(new, mouse)
    local oldSelectedFull = selectedFull
-   selected = math.clamp(new, 1, #currentPage.elements)
+   selectedWithMouse = mouse
+   selected = new and math.clamp(new, 1, #currentPage.elements) or 0
    selectedFull = math.round(selected)
    if oldSelectedFull ~= selectedFull then
       panelsApi.reload()
@@ -234,7 +237,9 @@ local function setSelected(new)
          panelsApi.anim(currentPage.elements[oldSelectedFull], 'selectElementAnim', 6, unselectElementAnim)
       end
       -- select
-      panelsApi.anim(currentPage.elements[selectedFull], 'selectElementAnim', 6, selectElementAnim)
+      if currentPage.elements[selected] then
+         panelsApi.anim(currentPage.elements[selectedFull], 'selectElementAnim', 6, selectElementAnim)
+      end
    end
 end
 
@@ -258,8 +263,22 @@ end
 
 panelsClick.release = panelsApi.reload
 
+local mouseClick = keybinds:newKeybind('panels - mouse click', 'key.mouse.left', true)
+mouseClick.press = function()
+   if host:isChatOpen() and selectedWithMouse then
+      local obj = currentPage.elements[selectedFull]
+      if obj and elements[obj.type].press then
+         elements[obj.type].press(obj)
+      end
+      panelsApi.reload()
+      return true
+   end
+end
+
+mouseClick.release = panelsApi.reload
+
 -- shift
-local shift = keybinds:newKeybind('panels - shift', 'key.keyboard.left.shift')
+local shift = keybinds:newKeybind('panels - shift', 'key.keyboard.left.shift', true)
 shift.press = function()
    if panelsEnabled and currentPage then
       return panelsClick:isPressed()
@@ -277,23 +296,35 @@ end
 
 -- scroll
 function events.mouse_scroll(dir)
-   if not panelsEnabled or not currentPage or host:getScreen() then return end
-   if panelsClick:isPressed() then
+   if not panelsEnabled or not currentPage then return end
+   if host:isChatOpen() then
       local obj = currentPage.elements[selectedFull]
-      if obj and elements[obj.type].scroll then
+      if obj and selectedWithMouse and elements[obj.type].scroll then
          elements[obj.type].scroll(obj, dir, shift:isPressed())
          panelsApi.reload()
       end
-   else
-      setSelected(selected - dir)
+   elseif not host:getScreen() then
+      if panelsClick:isPressed() then
+         local obj = currentPage.elements[selectedFull]
+         if obj and elements[obj.type].scroll then
+            elements[obj.type].scroll(obj, dir, shift:isPressed())
+            panelsApi.reload()
+         end
+      else
+         setSelected(selected - dir)
+      end
+      return true
    end
-   return true
 end
 
 -- rendering
 function events.tick()
+   -- panels animations
    panelsOldEnableTime = panelsEnableTime
    panelsEnableTime = math.clamp(panelsEnableTime + (panelsEnabled and 0.25 or -0.25), 0, 1)
+   oldChatOffset = chatOffset
+   chatOffset = math.lerp(chatOffset, host:isChatOpen() and 1 or 0, 0.25)
+   -- element animations
    for i, v in pairs(animations) do
       local haveAnimations = false
       for i2, v2 in pairs(v) do
@@ -308,23 +339,55 @@ function events.tick()
          animations[i] = nil
       end
    end
+   -- mouse
+   if not host:isChatOpen() then
+      selectedWithMouse = false
+      return
+   elseif not currentPage then
+      return
+   end
+   oldMousePos = mousePos
+   mousePos = panelsPos - client:getMousePos() / client:getGuiScale()
+   if mouseClick:isPressed() then
+      local obj = currentPage.elements[selectedFull]
+      if obj and elements[obj.type].scroll then
+         local dir = oldMousePos.x - mousePos.x
+         elements[obj.type].scroll(obj, dir * 0.25, shift:isPressed())
+         panelsApi.reload()
+      end
+      return
+   end
+   for i, v in pairs(currentPage.elements) do
+      if v.renderData then
+         local pos = v.renderData.renderedPos.xy
+         if mousePos >= pos - vec(128, v.renderData.height) and mousePos <= pos then
+            setSelected(i, true)
+            return
+         end
+      end
+   end
+   if selectedWithMouse then
+      setSelected()
+   end
 end
 
 local function updateElement(i, v)
-   return elements[v.type].renderElement(v, i == selectedFull, i == selectedFull and panelsClick:isPressed(), v.renderData.model, v.renderData.model:getTask())
+   local isPressed = i == selectedFull and (host:isChatOpen() and mouseClick:isPressed() or panelsClick:isPressed())
+   return elements[v.type].renderElement(v, i == selectedFull, isPressed, v.renderData.model, v.renderData.model:getTask())
 end
 
 function events.world_render(delta)
    local panelsTime = math.lerp(panelsOldEnableTime, panelsEnableTime, delta)
-   local panelsPos = client:getScaledWindowSize() * vec(0.5, 1)
+   local chatOffsetTime = math.lerp(oldChatOffset, chatOffset, delta)
+   chatOffsetTime = -(math.cos(math.pi * chatOffsetTime) - 1) / 2
+   panelsPos = client:getScaledWindowSize() * vec(0.5, 1)
    panelsPos.x = panelsPos.x + 95
-   panelsPos.y = panelsPos.y + 8 - (1 - (1 - panelsTime) ^ 3) * 10
+   panelsPos.y = panelsPos.y + 8 - (1 - (1 - panelsTime) ^ 3) * 10 - chatOffsetTime * 14
    panelsHud:setPos(-panelsPos.xy_)
    panelsHud:setVisible(panelsTime > 0)
    if needReload and panelsTime > 0 then
       needReload = false
       
-      panelsHud:removeTask()
       if currentPage then
          local height = 0
          for i = #currentPage.elements, 1, -1 do
@@ -333,11 +396,13 @@ function events.world_render(delta)
                v.renderData = {
                   model = panelsHud:newPart('element'),
                   selectOffset = 0,
+                  height = 0,
                }
                elements[v.type].createModel(v.renderData.model)
             end
             local heightOffset = updateElement(i, v)
             height = height + heightOffset * v.size.y
+            v.renderData.height = heightOffset * v.size.y
             v.renderData.renderedPos = vec(-v.pos.x, height - v.pos.y, i == selectedFull and -10 or 0)
             v.renderData.model:setPos(v.renderData.renderedPos + vec(v.renderData.selectOffset, 0, 0))
             v.renderData.model:setScale(v.size.x, v.size.y, 1)

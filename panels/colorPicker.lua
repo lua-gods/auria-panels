@@ -73,7 +73,7 @@ local function pageInit()
    for _, v in pairs(colors) do
       local color = vectors.hexToRGB(v[1])
       colorPresetsPage:newColorPicker():setEnabled(false):setColor(color):setText(v[2]):onPress(function()
-         currentColor = color
+         currentColor = color:copy()
          updateElements()
          updateColor()
          panels.previousPage()
