@@ -4,5 +4,6 @@
   "authors": [
     "Auria"
   ],
-  "color": "#ffc400"
+  "color": "#ffc400",
+  "autoScripts": ["init"]
 }

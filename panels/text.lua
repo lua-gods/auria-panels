@@ -1,3 +1,4 @@
+if not host:isHost() then return end
 --- @class panelsPage
 local myPageApi = {}
 --- @class panelsApi 

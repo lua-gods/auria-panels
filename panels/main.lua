@@ -1,3 +1,6 @@
+-- dont load panels when not host
+if not host:isHost() then return setmetatable({}, {__index = function() error('panels are host only, add host:isHost() if check around your code that uses panels') end}) end
+
 -- load theme
 local theme = require(.....'.theme')
 

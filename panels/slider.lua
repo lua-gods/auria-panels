@@ -1,3 +1,4 @@
+if not host:isHost() then return end
 --- @class panelsPage
 local myPageApi = {}
 --- @class panelsApi
@@ -19,7 +20,7 @@ function myPageApi:newSlider()
    obj.value = 0
    obj.min = 0
    obj.max = 16
-   obj.color = vec(0.98, 0.65, 0.78)
+   obj.color = panels.theme.rgb.sliderDefault
    obj.step = 1
    obj.preciseStep = nil
    obj.warp = false
@@ -130,31 +131,40 @@ end
 function api.createModel(model)
    model:newText('text'):setOutline(true):setPos(-sliderLen - 4, 0, 0)
    model:newSprite('slider'):setTexture(whitePixel, 1, 7)
-   model:newSprite('sliderBg'):setTexture(whitePixel, 1, 7):setColor(panels.theme.rgb.sliderBg)
+   model:newSprite('sliderBg'):setTexture(whitePixel, 1, 7)
    model:newSprite('sliderOutline'):setTexture(whitePixel, sliderLen + 2, 9):setColor(panels.theme.rgb.outline):setPos(1, 1, 1)
    model:newText('sliderText')
    model:newText('sliderText2')
 end
 
+local function getTextColor(color)
+   local luminance = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722
+   return luminance > 0.5 and panels.theme.sliderTextDark or panels.theme.sliderTextLight
+end
+
 function api.renderElement(data, isSelected, isPressed, model, tasks)
    -- text
-   local color = isPressed and panels.theme.pressed or isSelected and panels.theme.selected or panels.theme.default
+   local textColor = isPressed and panels.theme.pressed or isSelected and panels.theme.selected or panels.theme.default
    local text = toJson({
       text = '',
-      color = color,
+      color = textColor,
       extra = {data.text}
    })
    tasks.text:setText(text)
 
+   -- colors
+   local mainColor = data.color
+   local bgColor = vectors.hsvToRGB(vectors.rgbToHSV(data.color) * vec(1, 0.5, 0.25))
+
    -- slider
    local slider = (data.value - data.min) / (data.max - data.min)
-   tasks.slider:setColor(data.color):setScale(slider * sliderLen, 1, 1)
-   tasks.sliderBg:setScale(sliderLen * (1 - slider), 1, 1):setPos(- slider * sliderLen, 0, 0)
+   tasks.slider:setColor(mainColor):setScale(slider * sliderLen, 1, 1)
+   tasks.sliderBg:setColor(bgColor):setScale(sliderLen * (1 - slider), 1, 1):setPos(- slider * sliderLen, 0, 0)
    -- text
    local valueText = math.round(data.value * 10000) / 10000
    valueText = tostring(valueText):sub(1, 6)
-   tasks.sliderText:setText(toJson({text = valueText, color = panels.theme.outline}))
-   tasks.sliderText2:setText(valueText)
+   tasks.sliderText:setText(toJson({text = valueText, color = getTextColor(mainColor)}))
+   tasks.sliderText2:setText(toJson({text = valueText, color = getTextColor(bgColor)}))
 
    local mat = matrices.translate4(-1, 0, 2 / sliderLen - slider)
    mat.v31 = 1 / -sliderLen

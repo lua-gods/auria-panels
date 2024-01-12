@@ -1,6 +1,4 @@
-local enabledColor = vec(0.33, 0.99, 0.33)
-local disabledColor = vec(0.99, 0.33, 0.33)
-
+if not host:isHost() then return end
 --- @class panelsPage
 local myPageApi = {}
 --- @class panelsApi 

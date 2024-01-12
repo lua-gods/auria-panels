@@ -1,3 +1,6 @@
+-- stop script if not host
+if not host:isHost() then return end
+
 -- require panels
 local panels = require('panels.main')
 
@@ -19,7 +22,7 @@ page:newButton():setText({text = '△', font = 'figura:badges'})
 page:newButton():setText('hello | off'):onToggle(function(toggled, self) self:setText(toggled and 'hello | on' or 'hello | off') end)
 
 -- hue slider
-page:newSlider():setText('hue'):setMax(360):setValue(0):setStep(10, 1):allowWarping(true):onScroll(function(value, self) self:setColor(vectors.hsvToRGB(value / 360, 1, 1)) end)
+page:newSlider():setText('hue'):setColor(1, 0, 0):setMax(360):setValue(0):setStep(10, 1):allowWarping(true):onScroll(function(value, self) self:setColor(vectors.hsvToRGB(value / 360, 1, 1)) end)
 
 -- a text that changes when pressed
 page:newText():setText({text = ':cat: cat', color = '#ed773b'}):onPress(function(self) self:setText({text = ':cat: meow', color = '#fcc64f'}) end)
