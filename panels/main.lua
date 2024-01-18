@@ -240,7 +240,7 @@ local function setSelected(new, mouse)
          panelsApi.anim(currentPage.elements[oldSelectedFull], 'selectElementAnim', 6, unselectElementAnim)
       end
       -- select
-      if currentPage.elements[selected] then
+      if currentPage.elements[selectedFull] then
          panelsApi.anim(currentPage.elements[selectedFull], 'selectElementAnim', 6, selectElementAnim)
       end
    end
