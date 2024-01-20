@@ -13,9 +13,9 @@ local page, currentColor, updateElements, colorPickerObj
 local function pageInit()
    local function updateColor()
       if currentColor ~= colorPickerObj.color then
-         colorPickerObj.color = currentColor
+         colorPickerObj.color = currentColor:copy()
          if colorPickerObj.func then
-            colorPickerObj.func(currentColor, colorPickerObj)
+            colorPickerObj.func(colorPickerObj.color, colorPickerObj)
          end
       end
    end
