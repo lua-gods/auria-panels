@@ -98,7 +98,7 @@ function api.press(obj)
    if not page then pageInit() end
    if obj.press then obj.press(obj) end
    if not obj.enabled then return end
-   currentColor = obj.color
+   currentColor = obj.color:copy()
    colorPickerObj = obj
    updateElements()
    panels.setPage(page, true)
