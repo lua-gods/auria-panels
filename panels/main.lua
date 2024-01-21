@@ -351,7 +351,7 @@ function events.tick()
    end
    oldMousePos = mousePos
    mousePos = panelsPos - client:getMousePos() / client:getGuiScale()
-   if mouseClick:isPressed() then
+   if mouseClick:isPressed() and selectedWithMouse then
       local obj = currentPage.elements[selectedFull]
       if obj and elements[obj.type].scroll then
          local dir = oldMousePos.x - mousePos.x

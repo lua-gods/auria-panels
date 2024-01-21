@@ -16,10 +16,10 @@ obj:setText('meow')
 obj:setSize(2, 2)
 
 -- create text with figura triangle as text
-page:newButton():setText({text = '△', font = 'figura:badges'})
+page:newToggle():setText({text = '△', font = 'figura:badges'})
 
--- create button
-page:newButton():setText('hello | off'):onToggle(function(toggled, self) self:setText(toggled and 'hello | on' or 'hello | off') end)
+-- create toggle
+page:newToggle():setText('hello | off'):onToggle(function(toggled, self) self:setText(toggled and 'hello | on' or 'hello | off') end)
 
 -- hue slider
 page:newSlider():setText('hue'):setColor(1, 0, 0):setMax(360):setValue(0):setStep(10, 1):allowWarping(true):onScroll(function(value, self) self:setColor(vectors.hsvToRGB(value / 360, 1, 1)) end)
@@ -28,7 +28,7 @@ page:newSlider():setText('hue'):setColor(1, 0, 0):setMax(360):setValue(0):setSte
 page:newText():setText({text = ':cat: cat', color = '#ed773b'}):onPress(function(self) self:setText({text = ':cat: meow', color = '#fcc64f'}) end)
 
 -- color picker that prints color when its changed
-page:newColorPicker():setText('meow'):onColorChange(function(a, b) print(a) end)
+page:newColorPicker():setText('meow'):onColorChange(function(a, b) print(a) end):setColor(1, 0.5, 0)
 
 -- button to switch to different page
 page:newPageRedirect():setText('test'):setPage('test')
@@ -36,12 +36,12 @@ page:newPageRedirect():setText('test'):setPage('test')
 -- test page
 local page2 = panels.newPage('test')
 
--- some random example buttons
-page2:newButton():setText('button1')
-page2:newButton():setText('button2')
-page2:newButton():setText('button3')
-page2:newButton():setText('button4')
-page2:newButton():setText('button5'):setToggled(true)
+-- some random example toggle
+page2:newToggle():setText('always on'):onToggle(function(_, self) self:setToggled(true) end):setToggled(true)
+page2:newToggle():setText('always off'):onToggle(function(_, self) self:setToggled(false) end)
+page2:newToggle():setText('toggle 3')
+page2:newToggle():setText('toggle 4')
+page2:newToggle():setText('toggle 5'):setToggled(true)
 
 -- normal slider
 page2:newSlider():setRange(10, 30)

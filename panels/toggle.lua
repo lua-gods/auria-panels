@@ -3,15 +3,15 @@ if not host:isHost() then return end
 local myPageApi = {}
 --- @class panelsApi 
 local panels = {}
---- @class panelsElementButton : panelsElementDefault
+--- @class panelsElementToggle : panelsElementDefault
 local methods = {}
 local api = {page = myPageApi, methods = methods}
 
---- creates new panels button element
+--- creates new panels toggle element
 --- @param self panelsPage
---- @return panelsElementButton
-function myPageApi:newButton()
-   local obj = panels.newElement('button', self)
+--- @return panelsElementToggle
+function myPageApi:newToggle()
+   local obj = panels.newElement('toggle', self)
    obj.text = ''
    obj.toggled = false
    return obj
@@ -19,25 +19,25 @@ end
 
 -- methods
 --- set text of element, returns itself for chaining
---- @overload fun(self: panelsElementButton, text: string): panelsElementButton
---- @overload fun(self: panelsElementButton, text: table): panelsElementButton
+--- @overload fun(self: panelsElementToggle, text: string): panelsElementToggle
+--- @overload fun(self: panelsElementToggle, text: table): panelsElementToggle
 function methods:setText(text)
    self.text = text
    panels.reload()
    return self
 end
 
---- sets function that will be called when button is toggled, returns itself for chaining
---- @param func fun(toggled: boolean, obj: panelsElementButton)
---- @return panelsElementButton
+--- sets function that will be called when toggle is toggled, returns itself for chaining
+--- @param func fun(toggled: boolean, obj: panelsElementToggle)
+--- @return panelsElementToggle
 function methods:onToggle(func)
    self.toggle = func
    return self
 end
 
---- set if button should be on or off, returns itself for chaining
+--- set if toggle should be on or off, returns itself for chaining
 --- @param toggle boolean
---- @return panelsElementButton
+--- @return panelsElementToggle
 function methods:setToggled(toggle)
    self.toggled = toggle
    panels.reload()
@@ -86,4 +86,4 @@ function api.renderElement(data, isSelected, isPressed, model, tasks)
    return 10
 end
 
-return 'button', api, function(v) panels = v end
+return 'toggle', api, function(v) panels = v end

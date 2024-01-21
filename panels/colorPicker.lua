@@ -98,7 +98,7 @@ function api.press(obj)
    if not page then pageInit() end
    if obj.press then obj.press(obj) end
    if not obj.enabled then return end
-   currentColor = obj.color:copy()
+   currentColor = obj.color
    colorPickerObj = obj
    updateElements()
    panels.setPage(page, true)
@@ -130,6 +130,7 @@ function methods:setColor(r, g, b)
    else
       self.color = vec(r, g, b) 
    end
+   self.color = (self.color * 255):floor() / 255
    panels.reload()
    return self
 end
