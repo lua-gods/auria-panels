@@ -1,4 +1,20 @@
 return host:isHost() and {
+   render = function(model, time, chatOffset)
+      local pos = client:getScaledWindowSize() * vec(0.5, 1)
+      pos.x = pos.x + 95
+      pos.y = pos.y + 8 - (1 - (1 - time) ^ 3) * 10
+      pos.y = pos.y - chatOffset * 14
+      model:setPos(-pos.xy_)
+   end,
+   renderElements = function(elements, updateElement)
+      local previousPos = vec(0, 0)
+      for i = #elements, 1, -1 do
+         local v = elements[i]
+         local height = updateElement(i, v)
+         v.renderData.pos = vec(-v.pos.x, height - v.pos.y) + previousPos
+         previousPos = v.renderData.pos
+      end
+   end,
    default = '#a8a8a8',
    selected = '#ffffff',
    pressed = '#545454',

@@ -156,7 +156,7 @@ end
 function api.createModel(model)
    model:newText('text'):setOutline(true):setPos(-10, 0)
    model:newSprite('color'):setTexture(whitePixel, 7, 7)
-   model:newSprite('colorBg'):setTexture(whitePixel, 9, 9):setPos(1, 1, 0)
+   model:newSprite('colorBg'):setTexture(whitePixel, 9, 9):setPos(1, 1, 1)
 end
 
 function api.renderElement(data, isSelected, isPressed, model, tasks)

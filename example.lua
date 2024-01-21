@@ -16,7 +16,7 @@ obj:setText('meow')
 obj:setSize(2, 2)
 
 -- create text with figura triangle as text
-page:newToggle():setText({text = '△', font = 'figura:badges'})
+page:newToggle():setText({text = '△', font = 'figura:badges'}):setPos(0, -10)
 
 -- create toggle
 page:newToggle():setText('hello | off'):onToggle(function(toggled, self) self:setText(toggled and 'hello | on' or 'hello | off') end)

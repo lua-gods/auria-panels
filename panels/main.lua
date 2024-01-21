@@ -27,6 +27,7 @@ local defaultElementMethods = {}
 theme.rgb = {}
 for i, v in pairs(theme) do
    if type(v) == 'string' then
+      theme[i] = '#'..theme[i]:match('%x+')
       theme.rgb[i] = vectors.hexToRGB(v)
    end
 end
@@ -216,7 +217,7 @@ local function selectElementAnim(time, obj, model, tasks)
    time = 1 + c3 * (time - 1) ^ 3 + c1 * (time - 1) ^ 2
    -- apply animation
    obj.renderData.selectOffset = time * -4
-   model:setPos(obj.renderData.renderedPos + vec(obj.renderData.selectOffset, 0, 0))
+   model:setPos(obj.renderData.pos + vec(obj.renderData.selectOffset, 0, 0))
 end
 
 local function unselectElementAnim(time, obj, model, tasks)
@@ -225,7 +226,7 @@ local function unselectElementAnim(time, obj, model, tasks)
    time = 1 + c3 * (time - 1) ^ 3 + c1 * (time - 1) ^ 2
    -- apply animation
    obj.renderData.selectOffset = time * 4 - 4
-   model:setPos(obj.renderData.renderedPos + vec(obj.renderData.selectOffset, 0, 0))
+   model:setPos(obj.renderData.pos + vec(obj.renderData.selectOffset, 0, 0))
 end
 
 local function setSelected(new, mouse)
@@ -362,7 +363,7 @@ function events.tick()
    end
    for i, v in pairs(currentPage.elements) do
       if v.renderData then
-         local pos = v.renderData.renderedPos.xy
+         local pos = v.renderData.pos.xy
          if mousePos >= pos - vec(128, v.renderData.height) and mousePos <= pos then
             setSelected(i, true)
             return
@@ -375,39 +376,50 @@ function events.tick()
 end
 
 local function updateElement(i, v)
+   local isSelected = i == selectedFull
    local isPressed = i == selectedFull and (host:isChatOpen() and mouseClick:isPressed() or panelsClick:isPressed())
-   return elements[v.type].renderElement(v, i == selectedFull, isPressed, v.renderData.model, v.renderData.model:getTask())
+   local model = v.renderData.model
+   local height = elements[v.type].renderElement(v, isSelected, isPressed, model, model:getTask())
+   height = height * v.size.y
+   v.renderData.height = height
+   return height
 end
 
 function events.world_render(delta)
    local panelsTime = math.lerp(panelsOldEnableTime, panelsEnableTime, delta)
+   panelsHud:setVisible(panelsTime > 0)
+   if panelsTime == 0 then return end
+   -- render panels
    local chatOffsetTime = math.lerp(oldChatOffset, chatOffset, delta)
    chatOffsetTime = -(math.cos(math.pi * chatOffsetTime) - 1) / 2
-   panelsPos = client:getScaledWindowSize() * vec(0.5, 1)
-   panelsPos.x = panelsPos.x + 95
-   panelsPos.y = panelsPos.y + 8 - (1 - (1 - panelsTime) ^ 3) * 10 - chatOffsetTime * 14
-   panelsHud:setPos(-panelsPos.xy_)
-   panelsHud:setVisible(panelsTime > 0)
-   if needReload and panelsTime > 0 then
+   theme.render(
+      panelsHud,
+      panelsTime,
+      chatOffsetTime
+   )
+   panelsPos = -panelsHud:getPos().xy or vec(0, 0)
+   if needReload then
       needReload = false
       
       if currentPage then
-         local height = 0
-         for i = #currentPage.elements, 1, -1 do
-            local v = currentPage.elements[i]
+         -- create render data
+         for _, v in pairs(currentPage.elements) do
             if not v.renderData then
                v.renderData = {
                   model = panelsHud:newPart('element'),
                   selectOffset = 0,
                   height = 0,
+                  pos = vec(0, 0)
                }
                elements[v.type].createModel(v.renderData.model)
             end
-            local heightOffset = updateElement(i, v)
-            height = height + heightOffset * v.size.y
-            v.renderData.height = heightOffset * v.size.y
-            v.renderData.renderedPos = vec(-v.pos.x, height - v.pos.y, i == selectedFull and -10 or 0)
-            v.renderData.model:setPos(v.renderData.renderedPos + vec(v.renderData.selectOffset, 0, 0))
+         end
+         -- render
+         theme.renderElements(currentPage.elements, updateElement, selectedFull)
+         -- set postion and scale
+         for i, v in pairs(currentPage.elements) do
+            v.renderData.pos = v.renderData.pos:augmented(i == selectedFull and -10 or 0)
+            v.renderData.model:setPos(v.renderData.pos + vec(v.renderData.selectOffset, 0, 0))
             v.renderData.model:setScale(v.size.x, v.size.y, 1)
          end
       end
