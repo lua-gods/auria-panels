@@ -1,9 +1,6 @@
 -- dont load panels when not host
 if not host:isHost() then return setmetatable({}, {__index = function() error('panels are host only, add host:isHost() if check around your code that uses panels') end}) end
 
--- load theme
-local theme = require(.....'.theme')
-
 -- modelpart
 local panelsHud = models:newPart('panelsHud', 'Hud')
 
@@ -23,15 +20,29 @@ local oldMousePos, mousePos = vec(0, 0), vec(0, 0)
 --- @class panelsElementDefault
 local defaultElementMethods = {}
 
--- generate rgb colors for theme
+-- theme
+local defaultTheme = require(.....'.theme')
+local globalTheme = {}
+local theme = {}
 theme.rgb = {}
-for i, v in pairs(theme) do
-   if type(v) == 'string' then
-      theme[i] = '#'..theme[i]:match('%x+')
-      theme.rgb[i] = vectors.hexToRGB(v)
-   end
-end
 panelsApi.theme = theme
+local function getThemeValue(i)
+   return currentPage and currentPage.theme[i] or globalTheme[i] or defaultTheme[i]
+end
+setmetatable(theme, {
+   __index = function(_, i)
+      local v = getThemeValue(i)
+      local vType = type(v)
+      return vType == 'Vector3' and '#'..vectors.rgbToHex(v) or vType == 'string' and '#'..v:match('%x+') or v
+   end
+})
+setmetatable(theme.rgb, {
+   __index = function(_, i)
+      local v = getThemeValue(i)
+      local vType = type(v)
+      return vType == 'Vector3' and v or vType == 'string' and vectors.hexToRGB(v) or v
+   end
+})
 
 --- @class panelsPage
 local pageApi = {elements = {}}
@@ -42,7 +53,8 @@ local pageMetatable = {__index = pageApi}
 --- @return panelsPage
 function panelsApi.newPage(name)
    local page = {
-      elements = {}
+      elements = {},
+      theme = {}
    }
    if name then
       pages[name] = page
@@ -133,11 +145,17 @@ function panelsApi.newElement(name, page)
    return obj
 end
 
+--- sets global theme for panels, check panels/theme.lua to default theme, giving nil as input will remove global theme
+--- @param tbl table|nil
+function panelsApi.setTheme(tbl)
+   globalTheme = tbl or {}
+end
 
 --- removes element from page 
 --- @param i number
+--- @return self
 function pageApi:removeElement(i)
-   if not self.elements[i] then return end
+   if not self.elements[i] then return self end
    if self.elements[i].renderData.model then
       panelsHud:removeChild(self.elements[i].renderData.model)
       panelsApi.reload()
@@ -147,6 +165,7 @@ function pageApi:removeElement(i)
 end
 
 --- removes all elements from page
+--- @return self
 function pageApi:clear()
    if currentPage == self then
       for i, v in pairs(self.elements) do
@@ -159,9 +178,17 @@ end
 
 --- function called when page is open
 --- @param func fun(page: panelsPage)?
---- @return panelsPage
+--- @return self
 function pageApi:onOpen(func)
    self.openFunc = func
+   return self
+end
+
+--- sets page theme, check panels/theme.lua to default theme, giving nil as input will remove page theme
+--- @param tbl table|nil
+--- @return self
+function pageApi:setTheme(tbl)
+   self.theme = tbl or {}
    return self
 end
 
@@ -369,14 +396,23 @@ function events.tick()
       end
       return
    end
+   local closest = nil
+   local dist = math.huge
    for i, v in pairs(currentPage.elements) do
       if v.renderData then
          local pos = v.renderData.pos.xy
          if mousePos >= pos - vec(128, v.renderData.height) and mousePos <= pos then
-            setSelected(i, true)
-            return
+            local newDist = pos.x - mousePos.x
+            if newDist < dist then
+               closest = i
+               dist = newDist
+            end
          end
       end
+   end
+   if closest then
+      setSelected(closest, true)
+      return
    end
    if selectedWithMouse then
       setSelected()

@@ -14,6 +14,7 @@ panels.setPage(page)
 local obj = page:newText()
 obj:setText('meow')
 obj:setSize(2, 2)
+obj:setMargin(10)
 
 -- create text with figura triangle as text
 page:newToggle():setText({text = '△', font = 'figura:badges'}):setMargin(-10)
@@ -50,8 +51,42 @@ page2:newSlider():setRange(10, 30)
 
 -- create mrrowww page
 local page3 = panels.newPage('mrrooww')
--- add text mrroww
-page3:newText():setText('mrrowww')
+
+page3:setTheme({
+   render = function(model, time, chatOffset)
+      local pos = client:getScaledWindowSize() * vec(0.5, 0)
+      pos.y = 32 + 8 - (1 - (1 - time) ^ 3) * 10
+      model:setPos(-pos.xy_)
+   end,
+   renderElements = function(elements, updateElement, selected)
+      local currentHeight = 0
+      local offset = math.floor(#elements / 8) * 32
+      for i, v in pairs(elements) do
+         local height = updateElement(i, v)
+         v.renderData.pos = vec(offset - v.pos.x, currentHeight - v.pos.y)
+         currentHeight = currentHeight - height
+         if i % 8 == 0 then
+            offset = offset - 64
+            currentHeight = 0
+         end
+      end
+   end,
+   sliderDefault = '#fb5454',
+   on = '#fb5454',
+   off = '#545454',
+   returnSelected = '#ffaaaa',
+})
+
+-- add meows
+local meows = {'meow', 'miau', 'mrow', 'mraw', 'moew', 'mrow'}
+for _ = 1, 26 do
+   page3:newText():setText(meows[math.random(#meows)])
+end
+page3:newText():setText('miau')
+page3:newText():setText('mrow')
+page3:newSlider():setText('mraw')
+page3:newToggle():setText('moew')
+page3:newToggle():setText('mrow')
 
 -- add return button so you can go back to previous page
 page3:newReturnButton()

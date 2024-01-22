@@ -20,7 +20,7 @@ function myPageApi:newSlider()
    obj.value = 0
    obj.min = 0
    obj.max = 16
-   obj.color = panels.theme.rgb.sliderDefault
+   obj.color = nil
    obj.step = 1
    obj.preciseStep = nil
    obj.warp = false
@@ -153,8 +153,8 @@ function api.renderElement(data, isSelected, isPressed, model, tasks)
    tasks.text:setText(text)
 
    -- colors
-   local mainColor = data.color
-   local bgColor = vectors.hsvToRGB(vectors.rgbToHSV(data.color) * vec(1, 0.5, 0.25))
+   local mainColor = data.color or panels.theme.rgb.sliderDefault
+   local bgColor = vectors.hsvToRGB(vectors.rgbToHSV(mainColor) * vec(1, 0.5, 0.25))
 
    -- slider
    local slider = (data.value - data.min) / (data.max - data.min)

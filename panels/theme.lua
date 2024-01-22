@@ -6,7 +6,7 @@ return host:isHost() and {
       pos.y = pos.y - chatOffset * 14
       model:setPos(-pos.xy_)
    end,
-   renderElements = function(elements, updateElement)
+   renderElements = function(elements, updateElement, selected)
       local currentHeight = 0
       for i = #elements, 1, -1 do
          local v = elements[i]
