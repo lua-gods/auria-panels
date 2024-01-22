@@ -24,6 +24,7 @@ local function pageInit()
    local colorPresetsPage = panels.newPage()
 
    local colorPreview = page:newColorPicker():setEnabled(false):onPress(updateColor)
+   colorPreview:setMargin(2)
 
    local red = page:newSlider():setRange(0, 255):setStep(16, 1):setText('red')
    local green = page:newSlider():setRange(0, 255):setStep(16, 1):setText('green')
@@ -36,7 +37,7 @@ local function pageInit()
    blue:onScroll(function(v) currentColor.b = v / 255 updateElements() end)
    hue:onScroll(function(v) local hsv = vectors.rgbToHSV(currentColor) hsv.x = v / 360 currentColor = vectors.hsvToRGB(hsv) updateElements() end)
    saturation:onScroll(function(v) local hsv = vectors.rgbToHSV(currentColor) hsv.y = v / 100 currentColor = vectors.hsvToRGB(hsv) updateElements() end)
-   value:onScroll(function(v) local hsv = vectors.rgbToHSV(currentColor) hsv.z = v / 100 currentColor = vectors.hsvToRGB(hsv) updateElements() end)
+   value:onScroll(function(v) local hsv = vectors.rgbToHSV(currentColor) hsv.z = v / 100 currentColor = vectors.hsvToRGB(hsv) updateElements() end):setMargin(2)
 
    page:newPageRedirect():setText('presets'):setPage(colorPresetsPage)
 

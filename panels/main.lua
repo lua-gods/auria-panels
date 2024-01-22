@@ -124,7 +124,8 @@ function panelsApi.newElement(name, page)
    local obj = {
       type = name,
       pos = vec(0, 0),
-      size = vec(1, 1)
+      size = vec(1, 1),
+      margin = 0
    }
    setmetatable(obj, elements[name].metatable)
    table.insert(page.elements, obj)
@@ -165,8 +166,8 @@ function pageApi:onOpen(func)
 end
 
 --- sets pos of element, returns itself for self chaining
---- @overload fun(self: panelsElementDefault, x: number, y: number): panelsElementDefault
---- @overload fun(self: panelsElementDefault, x: Vector2): panelsElementDefault
+--- @overload fun(self: panelsElementDefault, x: number, y: number): self
+--- @overload fun(self: panelsElementDefault, x: Vector2): self
 function defaultElementMethods:setPos(x, y)
    if type(x) == 'Vector2' then
       self.pos = x
@@ -178,8 +179,8 @@ function defaultElementMethods:setPos(x, y)
 end
 
 --- sets size of element, returns itself for self chaining
---- @overload fun(self: panelsElementDefault, x: number, y: number): panelsElementDefault
---- @overload fun(self: panelsElementDefault, x: Vector2): panelsElementDefault
+--- @overload fun(self: panelsElementDefault, x: number, y: number): self
+--- @overload fun(self: panelsElementDefault, x: Vector2): self
 function defaultElementMethods:setSize(x, y)
    if type(x) == 'Vector2' then
       self.size = x
@@ -187,6 +188,13 @@ function defaultElementMethods:setSize(x, y)
       self.size = vec(x, y)
    end
    panelsApi.reload()
+   return self
+end
+
+---sets margin of element, returns itself for self chaining
+--- @overload fun(self: panelsElementDefault, y: number): self
+function defaultElementMethods:setMargin(y)
+   self.margin = y
    return self
 end
 
@@ -380,7 +388,7 @@ local function updateElement(i, v)
    local isPressed = i == selectedFull and (host:isChatOpen() and mouseClick:isPressed() or panelsClick:isPressed())
    local model = v.renderData.model
    local height = elements[v.type].renderElement(v, isSelected, isPressed, model, model:getTask())
-   height = height * v.size.y
+   height = height * v.size.y + v.margin
    v.renderData.height = height
    return height
 end

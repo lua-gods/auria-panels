@@ -7,12 +7,12 @@ return host:isHost() and {
       model:setPos(-pos.xy_)
    end,
    renderElements = function(elements, updateElement)
-      local previousPos = vec(0, 0)
+      local currentHeight = 0
       for i = #elements, 1, -1 do
          local v = elements[i]
          local height = updateElement(i, v)
-         v.renderData.pos = vec(-v.pos.x, height - v.pos.y) + previousPos
-         previousPos = v.renderData.pos
+         currentHeight = currentHeight + height
+         v.renderData.pos = vec(-v.pos.x, currentHeight - v.pos.y)
       end
    end,
    default = '#a8a8a8',
