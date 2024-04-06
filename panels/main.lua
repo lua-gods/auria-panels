@@ -14,6 +14,7 @@ local selected, selectedFull, selectedWithMouse = 0, 0, false
 local panelsEnabled = false
 local panelsEnableTime, panelsOldEnableTime = 0, 0
 local chatOffset, oldChatOffset = 0, 0
+local pageZoom, oldPageZoom = 0, 0
 local animations = {}
 local panelsPos = vec(0, 0)
 local oldMousePos, mousePos = vec(0, 0), vec(0, 0)
@@ -66,7 +67,7 @@ end
 --- sets panel page to the one provided, you can also use name of page instead 
 --- @overload fun(page: panelsPage, keepHistory: boolean?, dontAddToHistory: boolean?)
 --- @overload fun(pageName: string, keepHistory: boolean?, dontAddToHistory: boolean?)
-function panelsApi.setPage(page, keepHistory, dontAddToHistory)
+function panelsApi.setPage(page, keepHistory, dontAddToHistory, reverseZoomAnimation)
    -- remove all old parts
    if currentPage then
       for i, v in pairs(currentPage.elements) do
@@ -81,6 +82,12 @@ function panelsApi.setPage(page, keepHistory, dontAddToHistory)
    -- change selected element
    selected = 0
    selectedFull = 0
+   -- zoom animation
+   if reverseZoomAnimation then
+      pageZoom, oldPageZoom = 0.6, 1
+   else
+      pageZoom, oldPageZoom = -0.6, -1
+   end
    -- update history
    if not keepHistory then panelsApi.history = {} end
    if not dontAddToHistory then table.insert(panelsApi.history, page) end
@@ -90,8 +97,9 @@ end
 
 --- goes to previous page
 function panelsApi.previousPage()
+   -- set page
    table.remove(panelsApi.history)
-   panelsApi.setPage(panelsApi.history[#panelsApi.history], true, true)
+   panelsApi.setPage(panelsApi.history[#panelsApi.history], true, true, true)
 end
 
 --- gets created page with specific name, returns nil if doesnt exist
@@ -363,6 +371,8 @@ function events.tick()
    panelsEnableTime = math.clamp(panelsEnableTime + (panelsEnabled and 0.25 or -0.25), 0, 1)
    oldChatOffset = chatOffset
    chatOffset = math.lerp(chatOffset, host:isChatOpen() and 1 or 0, 0.25)
+   oldPageZoom = pageZoom
+   pageZoom = pageZoom * 0.6
    -- element animations
    for i, v in pairs(animations) do
       local haveAnimations = false
@@ -401,7 +411,7 @@ function events.tick()
    for i, v in pairs(currentPage.elements) do
       if v.renderData then
          local pos = v.renderData.pos.xy
-         if mousePos >= pos - vec(128, v.renderData.height) and mousePos <= pos then
+         if mousePos >= pos - vec(128, v.renderData.heightNoMargin) and mousePos <= pos then
             local newDist = pos.x - mousePos.x
             if newDist < dist then
                closest = i
@@ -424,7 +434,9 @@ local function updateElement(i, v)
    local isPressed = i == selectedFull and (host:isChatOpen() and mouseClick:isPressed() or panelsClick:isPressed())
    local model = v.renderData.model
    local height = elements[v.type].renderElement(v, isSelected, isPressed, model, model:getTask())
-   height = height * v.size.y + v.margin
+   height = height * v.size.y
+   v.renderData.heightNoMargin = height
+   height = height + v.margin
    v.renderData.height = height
    return height
 end
@@ -439,7 +451,8 @@ function events.world_render(delta)
    theme.render(
       panelsHud,
       panelsTime,
-      chatOffsetTime
+      chatOffsetTime,
+      math.lerp(oldPageZoom, pageZoom, delta)
    )
    panelsPos = -panelsHud:getPos().xy or vec(0, 0)
    if needReload then

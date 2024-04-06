@@ -14,7 +14,7 @@ panels.setPage(page)
 local obj = page:newText()
 obj:setText('meow')
 obj:setSize(2, 2)
-obj:setMargin(10)
+obj:setMargin(4)
 
 -- create text with figura triangle as text
 page:newToggle():setText({text = '△', font = 'figura:badges'}):setMargin(-10)
@@ -53,10 +53,13 @@ page2:newSlider():setRange(10, 30)
 local page3 = panels.newPage('mrrooww')
 
 page3:setTheme({
-   render = function(model, time, chatOffset)
+   render = function(model, time, chatOffset, pageZoom)
       local pos = client:getScaledWindowSize() * vec(0.5, 0)
-      pos.y = 32 + 8 - (1 - (1 - time) ^ 3) * 10
+      time = (1 - time) ^ 3
+      pos.y = 64 - (1 - time) * 32
       model:setPos(-pos.xy_)
+      local scale = 1 + pageZoom * 0.2
+      model:setScale(scale * (1 - time * vec(0.5, 1, 1)))
    end,
    renderElements = function(elements, updateElement, selected)
       local currentHeight = 0

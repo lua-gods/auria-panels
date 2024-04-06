@@ -1,10 +1,11 @@
 return host:isHost() and {
-   render = function(model, time, chatOffset)
+   render = function(model, time, chatOffset, pageZoom)
       local pos = client:getScaledWindowSize() * vec(0.5, 1)
       pos.x = pos.x + 95
       pos.y = pos.y + 8 - (1 - (1 - time) ^ 3) * 10
       pos.y = pos.y - chatOffset * 14
       model:setPos(-pos.xy_)
+      model:setScale(1 + pageZoom * 0.2)
    end,
    renderElements = function(elements, updateElement, selected)
       local currentHeight = 0
