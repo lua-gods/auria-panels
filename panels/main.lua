@@ -230,6 +230,23 @@ end
 --- @overload fun(self: panelsElementDefault, y: number): self
 function defaultElementMethods:setMargin(y)
    self.margin = y
+   panelsApi.reload()
+   return self
+end
+
+---sets icons for element, uv x, y is pos z, w is size
+--- @overload fun(self: panelsElementDefault, texture: Texture, uv: Vector4?): self
+--- @overload fun(self: panelsElementDefault): self
+function defaultElementMethods:setIcon(texture, uv)
+   if texture then
+      self.icon = {
+         texture = texture,
+         uv = uv
+      }
+   else
+      self.icon = nil
+   end
+   panelsApi.reload()
    return self
 end
 
@@ -260,7 +277,7 @@ local function selectElementAnim(time, obj, model, tasks)
    time = 1 + c3 * (time - 1) ^ 3 + c1 * (time - 1) ^ 2
    -- apply animation
    obj.renderData.selectOffset = time * -4
-   model:setPos(obj.renderData.pos + vec(obj.renderData.selectOffset, 0, 0))
+   model:getParent():setPos(obj.renderData.pos + vec(obj.renderData.selectOffset, 0, 0))
 end
 
 local function unselectElementAnim(time, obj, model, tasks)
@@ -269,7 +286,7 @@ local function unselectElementAnim(time, obj, model, tasks)
    time = 1 + c3 * (time - 1) ^ 3 + c1 * (time - 1) ^ 2
    -- apply animation
    obj.renderData.selectOffset = time * 4 - 4
-   model:setPos(obj.renderData.pos + vec(obj.renderData.selectOffset, 0, 0))
+   model:getParent():setPos(obj.renderData.pos + vec(obj.renderData.selectOffset, 0, 0))
 end
 
 local function setSelected(new, mouse)
@@ -432,8 +449,27 @@ end
 local function updateElement(i, v)
    local isSelected = i == selectedFull
    local isPressed = i == selectedFull and (host:isChatOpen() and mouseClick:isPressed() or panelsClick:isPressed())
-   local model = v.renderData.model
-   local height = elements[v.type].renderElement(v, isSelected, isPressed, model, model:getTask())
+   local model = v.renderData.elementModel
+   local tasks = model:getTask()
+   -- update text and icon
+   if v.icon then
+      tasks.icon:setVisible(true)
+      model:setPos(-9, 0, 0)
+      local textureSize = v.icon.texture:getDimensions()
+      tasks.icon:setTexture(v.icon.texture, textureSize.x, textureSize.y):setScale(8 / textureSize.x, 8 / textureSize.y, 0)
+      if v.icon.uv then
+         tasks.icon:setUV(v.icon.uv.xy / textureSize):setRegion(v.icon.uv.zw)
+         panelsApi.reload()
+      else
+         tasks.icon:setRegion(textureSize)
+      end
+   else
+      model:setPos(0, 0, 0)
+      tasks.icon:setVisible(false)
+   end
+   -- render element
+   local height = elements[v.type].renderElement(v, isSelected, isPressed, model, tasks)
+   -- calculate height
    height = height * v.size.y
    v.renderData.heightNoMargin = height
    height = height + v.margin
@@ -468,7 +504,9 @@ function events.world_render(delta)
                   height = 0,
                   pos = vec(0, 0)
                }
-               elements[v.type].createModel(v.renderData.model)
+               v.renderData.elementModel = v.renderData.model:newPart('')
+               v.renderData.elementModel:newSprite('icon'):pos(10, 0, 0)
+               elements[v.type].createModel(v.renderData.elementModel)
             end
          end
          -- render
@@ -485,7 +523,8 @@ function events.world_render(delta)
    for obj, anims in pairs(animations) do
       for name, data in pairs(anims) do
          local time = math.min(data.time + delta, data.duration) / data.duration
-         data.func(time, obj, obj.renderData.model, obj.renderData.model:getTask())
+         local model = obj.renderData.elementModel
+         data.func(time, obj, model, model:getTask())
       end
    end
 end
