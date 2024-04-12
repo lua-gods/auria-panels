@@ -145,7 +145,9 @@ function panelsApi.newElement(name, page)
       type = name,
       pos = vec(0, 0),
       size = vec(1, 1),
-      margin = 0
+      margin = 0,
+      text = '',
+      icon = nil -- {texture = texture, uv = Vector4}
    }
    setmetatable(obj, elements[name].metatable)
    table.insert(page.elements, obj)
@@ -153,7 +155,7 @@ function panelsApi.newElement(name, page)
    return obj
 end
 
---- sets global theme for panels, check panels/theme.lua to default theme, giving nil as input will remove global theme
+--- sets global theme for panels, check panels/theme.lua for default theme, giving nil as input will remove global theme
 --- @param tbl table|nil
 function panelsApi.setTheme(tbl)
    globalTheme = tbl or {}
@@ -214,8 +216,8 @@ function defaultElementMethods:setPos(x, y)
 end
 
 --- sets size of element, returns itself for self chaining
---- @overload fun(self: panelsElementDefault, x: number, y: number): self
---- @overload fun(self: panelsElementDefault, x: Vector2): self
+--- @overload fun(self: self, x: number, y: number): self
+--- @overload fun(self: self, x: Vector2): self
 function defaultElementMethods:setSize(x, y)
    if type(x) == 'Vector2' then
       self.size = x
@@ -227,9 +229,17 @@ function defaultElementMethods:setSize(x, y)
 end
 
 ---sets margin of element, returns itself for self chaining
---- @overload fun(self: panelsElementDefault, y: number): self
+--- @overload fun(self: self, y: number): self
 function defaultElementMethods:setMargin(y)
    self.margin = y
+   panelsApi.reload()
+   return self
+end
+
+--- set text of element, returns itself for chaining
+--- @overload fun(self: self, text: string | table): self
+function defaultElementMethods:setText(text)
+   self.text = text
    panelsApi.reload()
    return self
 end
@@ -452,6 +462,11 @@ local function updateElement(i, v)
    local model = v.renderData.elementModel
    local tasks = model:getTask()
    -- update text and icon
+   tasks.text:setText(toJson({
+      text = '',
+      color = isPressed and theme.pressed or isSelected and theme.selected or theme.default,
+      extra = {v.text}
+   }))
    if v.icon then
       tasks.icon:setVisible(true)
       model:setPos(-9, 0, 0)

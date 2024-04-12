@@ -16,15 +16,21 @@ return host:isHost() and {
          v.renderData.pos = vec(-v.pos.x, currentHeight - v.pos.y)
       end
    end,
-   default = '#a8a8a8',
-   selected = '#ffffff',
-   pressed = '#545454',
-   outline = '#202020',
+
+   icons = textures[.....'.icons'],
+
    on = '#54fb54',
    off = '#fb5454',
+
    sliderTextLight = '#ffffff',
    sliderTextDark = '#202020',
    sliderDefault = '#fca3c4',
+   sliderOutline = '#202020',
+
+   default = '#a8a8a8',
+   selected = '#ffffff',
+   pressed = '#545454',
+
    returnDefault = '#fc5454',
    returnSelected = '#ffaaba',
    returnPressed = '#884050'

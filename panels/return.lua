@@ -11,7 +11,9 @@ local api = {page = myPageApi, methods = methods}
 --- @param self panelsPage
 --- @return panelsElementReturn
 function myPageApi:newReturnButton()
-   return panels.newElement('return', self)
+   local obj = panels.newElement('return', self)
+   obj.text = 'return'
+   return obj
 end
 
 function api.press(obj)

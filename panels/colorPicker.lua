@@ -26,20 +26,20 @@ local function pageInit()
    local colorPreview = page:newColorPicker():setEnabled(false):onPress(updateColor)
    colorPreview:setMargin(2)
 
-   local red = page:newSlider():setRange(0, 255):setStep(16, 1):setText('red')
-   local green = page:newSlider():setRange(0, 255):setStep(16, 1):setText('green')
-   local blue = page:newSlider():setRange(0, 255):setStep(16, 1):setText('blue')
-   local hue = page:newSlider():setRange(0, 360):setStep(20, 1):allowWarping(true):setText('hue')
-   local saturation = page:newSlider():setRange(0, 100):setStep(10, 1):setText('saturation')
-   local value = page:newSlider():setRange(0, 100):setStep(10, 1):setText('value')
-   red:onScroll(function(v) currentColor.r = v / 255 updateElements() end)
-   green:onScroll(function(v) currentColor.g = v / 255 updateElements() end)
-   blue:onScroll(function(v) currentColor.b = v / 255 updateElements() end)
-   hue:onScroll(function(v) local hsv = vectors.rgbToHSV(currentColor) hsv.x = v / 360 currentColor = vectors.hsvToRGB(hsv) updateElements() end)
-   saturation:onScroll(function(v) local hsv = vectors.rgbToHSV(currentColor) hsv.y = v / 100 currentColor = vectors.hsvToRGB(hsv) updateElements() end)
-   value:onScroll(function(v) local hsv = vectors.rgbToHSV(currentColor) hsv.z = v / 100 currentColor = vectors.hsvToRGB(hsv) updateElements() end):setMargin(2)
+   local red = page:newSlider():setRange(0, 255):setStep(16, 1)
+   local green = page:newSlider():setRange(0, 255):setStep(16, 1)
+   local blue = page:newSlider():setRange(0, 255):setStep(16, 1)
+   local hue = page:newSlider():setRange(0, 360):setStep(20, 1):allowWarping(true)
+   local saturation = page:newSlider():setRange(0, 100):setStep(10, 1)
+   local value = page:newSlider():setRange(0, 100):setStep(10, 1)
+   red:onScroll(function(v) currentColor.r = v / 255 updateElements() end):setText('red')
+   green:onScroll(function(v) currentColor.g = v / 255 updateElements() end):setText('green')
+   blue:onScroll(function(v) currentColor.b = v / 255 updateElements() end):setText('blue')
+   hue:onScroll(function(v) local hsv = vectors.rgbToHSV(currentColor) hsv.x = v / 360 currentColor = vectors.hsvToRGB(hsv) updateElements() end):setText('hue')
+   saturation:onScroll(function(v) local hsv = vectors.rgbToHSV(currentColor) hsv.y = v / 100 currentColor = vectors.hsvToRGB(hsv) updateElements() end):setText('saturation')
+   value:onScroll(function(v) local hsv = vectors.rgbToHSV(currentColor) hsv.z = v / 100 currentColor = vectors.hsvToRGB(hsv) updateElements() end):setMargin(2):setText('value')
 
-   page:newPageRedirect():setText('presets'):setPage(colorPresetsPage)
+   page:newPageRedirect():setPage(colorPresetsPage):setText('presets')
 
    page:newReturnButton():onReturn(updateColor)
 
@@ -74,7 +74,9 @@ local function pageInit()
    }
    for _, v in pairs(colors) do
       local color = vectors.hexToRGB(v[1])
-      colorPresetsPage:newColorPicker():setEnabled(false):setColor(color):setText(v[2]):onPress(function()
+      local element = colorPresetsPage:newColorPicker()
+      element:setEnabled(false):setColor(color):setText(v[2])
+      element:onPress(function()
          currentColor = color:copy()
          updateElements()
          updateColor()
@@ -89,7 +91,6 @@ end
 --- @return panelsElementColorPicker
 function myPageApi:newColorPicker()
    local obj = panels.newElement('colorPicker', self)
-   obj.text = ''
    obj.color = vec(1, 1, 1)
    obj.enabled = true
    return obj
@@ -106,14 +107,6 @@ function api.press(obj)
 end
 
 -- methods
---- set text of element, returns itself for chaining
---- @overload fun(text: string): panelsElementColorPicker
---- @overload fun(text: table): panelsElementColorPicker
-function methods:setText(text)
-   self.text = text
-   panels.reload()
-   return self
-end
 
 --- sets if element is enabled, returns itself for chaining
 --- @overload fun(enabled: boolean): panelsElementColorPicker
@@ -161,13 +154,6 @@ function api.createModel(model)
 end
 
 function api.renderElement(data, isSelected, isPressed, model, tasks)
-   local color = isPressed and panels.theme.pressed or isSelected and panels.theme.selected or panels.theme.default
-   local text = toJson({
-      text = '',
-      color = color,
-      extra = {data.text}
-   })
-   tasks.text:setText(text)
    tasks.color:setColor(data.color)
    tasks.colorBg:setColor(data.color * 0.25)
    return 10

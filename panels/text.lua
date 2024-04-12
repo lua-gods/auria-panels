@@ -12,7 +12,6 @@ local api = {page = myPageApi, methods = methods}
 --- @return panelsElementText
 function myPageApi:newText()
    local obj = panels.newElement('text', self)
-   obj.text = ''
    return obj
 end
 
@@ -23,18 +22,9 @@ function api.press(obj)
 end
 
 -- methods
---- set text of element, returns itself for chaining
---- @overload fun(self: panelsElementText, text: string): panelsElementText
---- @overload fun(self: panelsElementText, text: table): panelsElementText
-function methods:setText(text)
-   self.text = text
-   panels.reload()
-   return self
-end
-
 --- sets function that will be called when text is pressed, returns itself for chaining
 --- @param func fun(obj: panelsElementText)
---- @return panelsElementText
+--- @return self
 function methods:onPress(func)
    self.press = func
    return self
@@ -46,13 +36,6 @@ function api.createModel(model)
 end
 
 function api.renderElement(data, isSelected, isPressed, model, tasks)
-   local color = isPressed and panels.theme.pressed or isSelected and panels.theme.selected or panels.theme.default
-   local text = toJson({
-      text = '',
-      color = color,
-      extra = {data.text}
-   })
-   tasks.text:setText(text)
    return 10
 end
 

@@ -12,7 +12,7 @@ local api = {page = myPageApi, methods = methods}
 --- @return panelsElementPageRedirect
 function myPageApi:newPageRedirect()
    local obj = panels.newElement('pageRedirect', self)
-   obj.text = ''
+   obj:setIcon(panels.theme.icons, vec(0, 0, 8, 8))
    return obj
 end
 
@@ -23,14 +23,6 @@ function api.press(obj)
 end
 
 -- methods
---- set text of element, returns itself for chaining
---- @param text string
---- @return panelsElementPageRedirect
-function methods:setText(text)
-   self.text = text
-   panels.reload()
-   return self
-end
 
 --- sets function that will be called when text is pressed, returns itself for chaining
 --- @overload fun(self: panelsElementPageRedirect, page: panelsPage): panelsElementPageRedirect
@@ -46,12 +38,6 @@ function api.createModel(model)
 end
 
 function api.renderElement(data, isSelected, isPressed, model, tasks)
-   local color = isPressed and panels.theme.pressed or isSelected and panels.theme.selected or panels.theme.default
-   local text = toJson({
-      {text = '> ', color = color},
-      {text = data.text, color = color}
-   })
-   tasks.text:setText(text)
    return 10
 end
 

@@ -16,7 +16,6 @@ local sliderLen = 34
 --- @return panelsElementSlider
 function myPageApi:newSlider()
    local obj = panels.newElement('slider', self)
-   obj.text = ''
    obj.value = 0
    obj.min = 0
    obj.max = 16
@@ -44,14 +43,6 @@ function api.scroll(obj, dir, shift)
 end
 
 -- methods
---- set text of slider, returns itself for chaining
---- @overload fun(self: panelsElementSlider, text: string): panelsElementSlider
---- @overload fun(self: panelsElementSlider, text: table): panelsElementSlider
-function methods:setText(text)
-   self.text = text
-   panels.reload()
-   return self
-end
 
 --- sets color of slider, returns itself for chaining
 --- @overload fun(self: panelsElementSlider, r: number, g: number, b: number): panelsElementSlider
@@ -132,7 +123,7 @@ function api.createModel(model)
    model:newText('text'):setOutline(true):setPos(-sliderLen - 4, 0, 0)
    model:newSprite('slider'):setTexture(whitePixel, 1, 7)
    model:newSprite('sliderBg'):setTexture(whitePixel, 1, 7)
-   model:newSprite('sliderOutline'):setTexture(whitePixel, sliderLen + 2, 9):setColor(panels.theme.rgb.outline):setPos(1, 1, 1)
+   model:newSprite('sliderOutline'):setTexture(whitePixel, sliderLen + 2, 9):setColor(panels.theme.rgb.sliderOutline):setPos(1, 1, 1)
    model:newText('sliderText')
    model:newText('sliderText2')
 end
@@ -143,15 +134,6 @@ local function getTextColor(color)
 end
 
 function api.renderElement(data, isSelected, isPressed, model, tasks)
-   -- text
-   local textColor = isPressed and panels.theme.pressed or isSelected and panels.theme.selected or panels.theme.default
-   local text = toJson({
-      text = '',
-      color = textColor,
-      extra = {data.text}
-   })
-   tasks.text:setText(text)
-
    -- colors
    local mainColor = data.color or panels.theme.rgb.sliderDefault
    local bgColor = vectors.hsvToRGB(vectors.rgbToHSV(mainColor) * vec(1, 0.5, 0.25))

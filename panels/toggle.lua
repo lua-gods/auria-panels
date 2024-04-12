@@ -12,20 +12,11 @@ local api = {page = myPageApi, methods = methods}
 --- @return panelsElementToggle
 function myPageApi:newToggle()
    local obj = panels.newElement('toggle', self)
-   obj.text = ''
    obj.toggled = false
    return obj
 end
 
 -- methods
---- set text of element, returns itself for chaining
---- @overload fun(self: panelsElementToggle, text: string): panelsElementToggle
---- @overload fun(self: panelsElementToggle, text: table): panelsElementToggle
-function methods:setText(text)
-   self.text = text
-   panels.reload()
-   return self
-end
 
 --- sets function that will be called when toggle is toggled, returns itself for chaining
 --- @param func fun(toggled: boolean, obj: panelsElementToggle)
@@ -71,12 +62,6 @@ end
 function api.renderElement(data, isSelected, isPressed, model, tasks)
    -- text
    local selectColor = isPressed and panels.theme.pressed or isSelected and panels.theme.selected or panels.theme.default
-   local text = toJson({
-      text = '',
-      color = selectColor,
-      extra = {data.text}
-   })
-   tasks.text:setText(text)
    tasks.toggle:setText('{"text":"[]","color":"'..selectColor..'"}')
    -- toggle
    local toggleColor = data.toggled and panels.theme.on or panels.theme.off
