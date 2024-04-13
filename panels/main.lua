@@ -6,6 +6,8 @@ local panelsHud = models:newPart('panelsHud', 'Hud')
 
 --- @class panelsApi
 local panelsApi = {history = {}}
+--- @class panelsElementDefault
+local defaultElementMethods = {}
 local pages = {}
 local currentPage = nil
 local elements = {}
@@ -18,8 +20,7 @@ local pageZoom, oldPageZoom = 0, 0
 local animations = {}
 local panelsPos = vec(0, 0)
 local oldMousePos, mousePos = vec(0, 0), vec(0, 0)
---- @class panelsElementDefault
-local defaultElementMethods = {}
+local lastMinecraftScreen = nil
 
 -- theme
 local defaultTheme = require(.....'.theme')
@@ -67,9 +68,10 @@ end
 --- sets panel page to the one provided, you can also use name of page instead 
 --- @overload fun(page: panelsPage, keepHistory: boolean?, dontAddToHistory: boolean?)
 --- @overload fun(pageName: string, keepHistory: boolean?, dontAddToHistory: boolean?)
-function panelsApi.setPage(page, keepHistory, dontAddToHistory, reverseZoomAnimation)
+function panelsApi.setPage(page, keepHistory, dontAddToHistory, reverseZoomAnimation, selectedElement)
    -- remove all old parts
    if currentPage then
+      currentPage.lastSelectedElement = selectedFull
       for i, v in pairs(currentPage.elements) do
          panelsHud:removeChild(v.renderData.model)
          v.renderData = nil
@@ -80,8 +82,18 @@ function panelsApi.setPage(page, keepHistory, dontAddToHistory, reverseZoomAnima
    panelsApi.reload()
    animations = {}
    -- change selected element
-   selected = 0
-   selectedFull = 0
+   if selectedElement then
+      selected = selectedElement
+   else
+      selected = 0
+      for i, v in pairs(currentPage.elements) do
+         if v.type == 'return' then
+            selected = i
+            break
+         end
+      end
+   end
+   selectedFull = selected
    -- zoom animation
    if reverseZoomAnimation then
       pageZoom, oldPageZoom = 0.6, 1
@@ -90,16 +102,18 @@ function panelsApi.setPage(page, keepHistory, dontAddToHistory, reverseZoomAnima
    end
    -- update history
    if not keepHistory then panelsApi.history = {} end
-   if not dontAddToHistory then table.insert(panelsApi.history, page) end
+   if not dontAddToHistory then table.insert(panelsApi.history, currentPage) end
    -- on open
    if currentPage.openFunc then currentPage.openFunc(currentPage) end
 end
 
 --- goes to previous page
 function panelsApi.previousPage()
-   -- set page
-   table.remove(panelsApi.history)
-   panelsApi.setPage(panelsApi.history[#panelsApi.history], true, true, true)
+   if #panelsApi.history >= 2 then
+      table.remove(panelsApi.history)
+      local page = panelsApi.history[#panelsApi.history]
+      panelsApi.setPage(page, true, true, true, page.lastSelectedElement)
+   end
 end
 
 --- gets created page with specific name, returns nil if doesnt exist
@@ -174,8 +188,8 @@ function pageApi:removeElement(i)
    return self
 end
 
---- removes all elements from page
---- @return self
+---removes all elements from page
+---@return self
 function pageApi:clear()
    if currentPage == self then
       for i, v in pairs(self.elements) do
@@ -186,25 +200,28 @@ function pageApi:clear()
    return self
 end
 
---- function called when page is open
---- @param func fun(page: panelsPage)?
---- @return self
+---function called when page is open
+---@param func fun(page: panelsPage)?
+---@return self
 function pageApi:onOpen(func)
    self.openFunc = func
    return self
 end
 
---- sets page theme, check panels/theme.lua to default theme, giving nil as input will remove page theme
---- @param tbl table|nil
---- @return self
+---sets page theme, check panels/theme.lua to default theme, giving nil as input will remove page theme
+---@param tbl table|nil
+---@return self
 function pageApi:setTheme(tbl)
    self.theme = tbl or {}
    return self
 end
 
---- sets pos of element, returns itself for self chaining
---- @overload fun(self: panelsElementDefault, x: number, y: number): self
---- @overload fun(self: panelsElementDefault, x: Vector2): self
+---sets pos of element, returns itself for self chaining
+---@generic self
+---@param self self
+---@param x Vector2 | number
+---@param y number
+---@return self
 function defaultElementMethods:setPos(x, y)
    if type(x) == 'Vector2' then
       self.pos = x
@@ -215,9 +232,12 @@ function defaultElementMethods:setPos(x, y)
    return self
 end
 
---- sets size of element, returns itself for self chaining
---- @overload fun(self: self, x: number, y: number): self
---- @overload fun(self: self, x: Vector2): self
+---sets size of element, returns itself for self chaining
+---@generic self
+---@param self self
+---@param x Vector2 | number
+---@param y number
+---@return self
 function defaultElementMethods:setSize(x, y)
    if type(x) == 'Vector2' then
       self.size = x
@@ -229,7 +249,10 @@ function defaultElementMethods:setSize(x, y)
 end
 
 ---sets margin of element, returns itself for self chaining
---- @overload fun(self: self, y: number): self
+---@generic self
+---@param self self
+---@param y number
+---@return self
 function defaultElementMethods:setMargin(y)
    self.margin = y
    panelsApi.reload()
@@ -237,7 +260,10 @@ function defaultElementMethods:setMargin(y)
 end
 
 --- set text of element, returns itself for chaining
---- @overload fun(self: self, text: string | table): self
+---@generic self
+---@param self self
+---@param text string|table
+---@return self
 function defaultElementMethods:setText(text)
    self.text = text
    panelsApi.reload()
@@ -245,8 +271,11 @@ function defaultElementMethods:setText(text)
 end
 
 ---sets icons for element, uv x, y is pos z, w is size
---- @overload fun(self: panelsElementDefault, texture: Texture, uv: Vector4?): self
---- @overload fun(self: panelsElementDefault): self
+---@generic self
+---@param self self
+---@param texture Texture?
+---@param uv Vector4?
+---@return self
 function defaultElementMethods:setIcon(texture, uv)
    if texture then
       self.icon = {
@@ -362,7 +391,7 @@ end
 -- close panel
 local escKey = keybinds:newKeybind('panels - close', 'key.keyboard.escape')
 escKey.press = function()
-   if panelsEnabled then
+   if panelsEnabled and not lastMinecraftScreen then
       panelsEnabled = false
       return true
    end
@@ -393,6 +422,7 @@ end
 
 -- rendering
 function events.tick()
+   lastMinecraftScreen = host:getScreen()
    -- panels animations
    panelsOldEnableTime = panelsEnableTime
    panelsEnableTime = math.clamp(panelsEnableTime + (panelsEnabled and 0.25 or -0.25), 0, 1)
@@ -474,7 +504,6 @@ local function updateElement(i, v)
       tasks.icon:setTexture(v.icon.texture, textureSize.x, textureSize.y):setScale(8 / textureSize.x, 8 / textureSize.y, 0)
       if v.icon.uv then
          tasks.icon:setUV(v.icon.uv.xy / textureSize):setRegion(v.icon.uv.zw)
-         panelsApi.reload()
       else
          tasks.icon:setRegion(textureSize)
       end
@@ -511,11 +540,11 @@ function events.world_render(delta)
       
       if currentPage then
          -- create render data
-         for _, v in pairs(currentPage.elements) do
+         for i, v in pairs(currentPage.elements) do
             if not v.renderData then
                v.renderData = {
                   model = panelsHud:newPart('element'),
-                  selectOffset = 0,
+                  selectOffset = i == selectedFull and -4 or 0,
                   height = 0,
                   pos = vec(0, 0)
                }
