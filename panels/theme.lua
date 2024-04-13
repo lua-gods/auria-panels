@@ -17,7 +17,7 @@ return host:isHost() and {
       end
    end,
 
-   icons = textures[.....'.icons'],
+   icons = textures[(...):gsub('/', '.')..'.icons'],
 
    on = '#54fb54',
    off = '#fb5454',
