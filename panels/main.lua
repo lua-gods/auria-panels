@@ -270,17 +270,21 @@ function defaultElementMethods:setText(text)
    return self
 end
 
----sets icons for element, uv x, y is pos z, w is size
+---sets icons for element, uv x, y is pos z, w is size, select uv and press uv will be used instead of uv when present and element is selected/pressed
 ---@generic self
 ---@param self self
 ---@param texture Texture?
 ---@param uv Vector4?
+---@param selectUv Vector4?
+---@param pressUv Vector4?
 ---@return self
-function defaultElementMethods:setIcon(texture, uv)
+function defaultElementMethods:setIcon(texture, uv, selectUv, pressUv)
    if texture then
       self.icon = {
          texture = texture,
-         uv = uv
+         uv = uv,
+         selectUv = selectUv,
+         pressUv = pressUv
       }
    else
       self.icon = nil
@@ -502,8 +506,9 @@ local function updateElement(i, v)
       model:setPos(-9, 0, 0)
       local textureSize = v.icon.texture:getDimensions()
       tasks.icon:setTexture(v.icon.texture, textureSize.x, textureSize.y):setScale(8 / textureSize.x, 8 / textureSize.y, 0)
+      local uv = isPressed and v.icon.pressUv or isSelected and v.icon.selectUv or v.icon.uv
       if v.icon.uv then
-         tasks.icon:setUV(v.icon.uv.xy / textureSize):setRegion(v.icon.uv.zw)
+         tasks.icon:setUV(uv.xy / textureSize):setRegion(uv.zw)
       else
          tasks.icon:setRegion(textureSize)
       end

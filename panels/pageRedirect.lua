@@ -12,7 +12,7 @@ local api = {page = myPageApi, methods = methods}
 --- @return panelsElementPageRedirect
 function myPageApi:newPageRedirect()
    local obj = panels.newElement('pageRedirect', self)
-   obj:setIcon(panels.theme.icons, vec(0, 0, 8, 8))
+   obj:setIcon(panels.theme.icons, vec(0, 0, 8, 8), vec(0, 8, 8, 8), vec(0, 16, 8, 8))
    return obj
 end
 

@@ -13,7 +13,7 @@ local api = {page = myPageApi, methods = methods}
 function myPageApi:newReturnButton()
    local obj = panels.newElement('return', self)
    obj.text = 'return'
-   obj:setIcon(panels.theme.icons, vec(8, 0, 8, 8))
+   obj:setIcon(panels.theme.icons, vec(8, 0, 8, 8), vec(8, 8, 8, 8), vec(8, 16, 8, 8))
    return obj
 end
 
