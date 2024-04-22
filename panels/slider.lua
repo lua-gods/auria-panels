@@ -120,7 +120,7 @@ end
 
 -- rendering
 function api.createModel(model)
-   model:newText('text'):setOutline(true):setPos(-sliderLen - 4, 0, 0)
+   model:getTask('text'):setPos(-sliderLen - 4, 0, 0)
    model:newSprite('slider'):setTexture(whitePixel, 1, 7)
    model:newSprite('sliderBg'):setTexture(whitePixel, 1, 7)
    model:newSprite('sliderOutline'):setTexture(whitePixel, sliderLen + 2, 9):setColor(panels.theme.rgb.sliderOutline):setPos(1, 1, 1)
@@ -155,8 +155,6 @@ function api.renderElement(data, isSelected, isPressed, model, tasks)
    mat = matrices.translate4(-1, 0, slider)
    mat.v31 = 1 / sliderLen
    tasks.sliderText2:setMatrix(mat)
-   
-   return 10
 end
 
 return 'slider', api, function(v) panels = v end

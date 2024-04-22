@@ -273,7 +273,7 @@ end
 ---sets icons for element, uv x, y is pos z, w is size, select uv and press uv will be used instead of uv when present and element is selected/pressed
 ---@generic self
 ---@param self self
----@param texture Texture?
+---@param texture Texture|"theme"?
 ---@param uv Vector4?
 ---@param selectUv Vector4?
 ---@param pressUv Vector4?
@@ -504,8 +504,10 @@ local function updateElement(i, v)
    if v.icon then
       tasks.icon:setVisible(true)
       model:setPos(-9, 0, 0)
-      local textureSize = v.icon.texture:getDimensions()
-      tasks.icon:setTexture(v.icon.texture, textureSize.x, textureSize.y):setScale(8 / textureSize.x, 8 / textureSize.y, 0)
+      local iconTexture = v.icon.texture
+      if iconTexture == 'theme' then iconTexture = theme.icons end
+      local textureSize = iconTexture:getDimensions()
+      tasks.icon:setTexture(iconTexture, textureSize.x, textureSize.y):setScale(8 / textureSize.x, 8 / textureSize.y, 0)
       local uv = isPressed and v.icon.pressUv or isSelected and v.icon.selectUv or v.icon.uv
       if v.icon.uv then
          tasks.icon:setUV(uv.xy / textureSize):setRegion(uv.zw)
@@ -517,7 +519,7 @@ local function updateElement(i, v)
       tasks.icon:setVisible(false)
    end
    -- render element
-   local height = elements[v.type].renderElement(v, isSelected, isPressed, model, tasks)
+   local height = elements[v.type].renderElement and elements[v.type].renderElement(v, isSelected, isPressed, model, tasks) or 10
    -- calculate height
    height = height * v.size.y
    v.renderData.heightNoMargin = height
@@ -554,8 +556,9 @@ function events.world_render(delta)
                   pos = vec(0, 0)
                }
                v.renderData.elementModel = v.renderData.model:newPart('')
+               v.renderData.elementModel:newText('text'):setOutline(true)
                v.renderData.elementModel:newSprite('icon'):pos(10, 0, 0)
-               elements[v.type].createModel(v.renderData.elementModel)
+               if elements[v.type].createModel then elements[v.type].createModel(v.renderData.elementModel) end
             end
          end
          -- render

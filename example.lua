@@ -51,6 +51,20 @@ page2:newToggle():setText('toggle 5'):setToggled(true)
 -- normal slider
 page2:newSlider():setRange(10, 30)
 
+page2:setTheme({
+   icons = textures['example_icons'],
+
+   render = function(model, time, chatOffset, pageZoom)
+      local pos = client:getScaledWindowSize() * vec(0.5, 1)
+      pos.x = pos.x + 95
+      pos.y = pos.y + 8 - (1 - (1 - time) ^ 3) * 10
+      pos.y = pos.y - chatOffset * 14
+      pos.x = pos.x - pageZoom * 16
+      model:setPos(-pos.xy_)
+      model:setScale(1)
+   end,
+})
+
 -- create mrrowww page
 local page3 = panels.newPage('mrrooww')
 

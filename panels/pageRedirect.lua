@@ -12,7 +12,7 @@ local api = {page = myPageApi, methods = methods}
 --- @return panelsElementPageRedirect
 function myPageApi:newPageRedirect()
    local obj = panels.newElement('pageRedirect', self)
-   obj:setIcon(panels.theme.icons, vec(0, 0, 8, 8), vec(0, 8, 8, 8), vec(0, 16, 8, 8))
+   obj:setIcon('theme', vec(0, 0, 8, 8), vec(0, 8, 8, 8), vec(0, 16, 8, 8))
    return obj
 end
 
@@ -30,15 +30,6 @@ end
 function methods:setPage(page)
    self.page = page
    return self
-end
-
--- rendering
-function api.createModel(model)
-   model:newText('text'):setOutline(true)
-end
-
-function api.renderElement(data, isSelected, isPressed, model, tasks)
-   return 10
 end
 
 return 'pageRedirect', api, function(v) panels = v end

@@ -53,7 +53,7 @@ end
 
 -- rendering
 function api.createModel(model)
-   model:newText('text'):setOutline(true):setPos(-18, 0, 0)
+   model:getTask('text'):setPos(-18, 0, 0)
    model:newText('toggle'):setOutline(true):setPos(-2, 0, 0)
    model:newText('toggleLeft'):setOutline(true):setPos(0, 0, 2)
    model:newText('toggleRight'):setOutline(true):setPos(-10, 0, 2)
@@ -68,7 +68,6 @@ function api.renderElement(data, isSelected, isPressed, model, tasks)
    tasks.toggleLeft:setText('{"text":"[","color":"'..toggleColor..'"}')
    tasks.toggleRight:setText('{"text":"]","color":"'..toggleColor..'"}')
    tasks.toggle:setPos(data.toggled and -4 or -2, 0, 0)
-   return 10
 end
 
 return 'toggle', api, function(v) panels = v end

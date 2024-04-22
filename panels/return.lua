@@ -13,7 +13,7 @@ local api = {page = myPageApi, methods = methods}
 function myPageApi:newReturnButton()
    local obj = panels.newElement('return', self)
    obj.text = 'return'
-   obj:setIcon(panels.theme.icons, vec(8, 0, 8, 8), vec(8, 8, 8, 8), vec(8, 16, 8, 8))
+   obj:setIcon('theme', vec(8, 0, 8, 8), vec(8, 8, 8, 8), vec(8, 16, 8, 8))
    return obj
 end
 
@@ -33,10 +33,6 @@ function methods:onReturn(func)
 end
 
 -- rendering
-function api.createModel(model)
-   model:newText('text'):setOutline(true)
-end
-
 function api.renderElement(data, isSelected, isPressed, model, tasks)
    local color = isPressed and panels.theme.returnPressed or isSelected and panels.theme.returnSelected or panels.theme.returnDefault
    local text = toJson({
@@ -44,7 +40,6 @@ function api.renderElement(data, isSelected, isPressed, model, tasks)
       color = color,
    })
    tasks.text:setText(text)
-   return 10
 end
 
 return 'return', api, function(v) panels = v end

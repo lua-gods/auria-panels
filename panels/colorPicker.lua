@@ -148,7 +148,7 @@ end
 
 -- rendering
 function api.createModel(model)
-   model:newText('text'):setOutline(true):setPos(-10, 0)
+   model:getTask('text'):setPos(-10, 0)
    model:newSprite('color'):setTexture(whitePixel, 7, 7)
    model:newSprite('colorBg'):setTexture(whitePixel, 9, 9):setPos(1, 1, 1)
 end
@@ -156,7 +156,6 @@ end
 function api.renderElement(data, isSelected, isPressed, model, tasks)
    tasks.color:setColor(data.color)
    tasks.colorBg:setColor(data.color * 0.25)
-   return 10
 end
 
 return 'colorPicker', api, function(v) panels = v end

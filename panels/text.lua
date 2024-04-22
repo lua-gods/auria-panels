@@ -11,8 +11,7 @@ local api = {page = myPageApi, methods = methods}
 --- @param self panelsPage
 --- @return panelsElementText
 function myPageApi:newText()
-   local obj = panels.newElement('text', self)
-   return obj
+   return panels.newElement('text', self)
 end
 
 function api.press(obj)
@@ -31,12 +30,13 @@ function methods:onPress(func)
 end
 
 -- rendering
+--[[@@@
 function api.createModel(model)
-   model:newText('text'):setOutline(true)
 end
 
 function api.renderElement(data, isSelected, isPressed, model, tasks)
-   return 10
+   return 10 -- default value
 end
+]]
 
 return 'text', api, function(v) panels = v end
