@@ -6,7 +6,7 @@ local panels = {}
 --- @class panelsElementColorPicker : panelsElementDefault
 local methods = {}
 local api = {page = myPageApi, methods = methods}
-local whitePixel = textures.whitePixel or textures:newTexture('whitePixel', 1, 1):setPixel(0, 0, 1, 1, 1)
+local whitePixel = textures.whitePixel or textures:newTexture('whitePixel', 1, 1):pixel(0, 0, 1, 1, 1)
 
 -- page
 local page, currentColor, updateElements, colorPickerObj

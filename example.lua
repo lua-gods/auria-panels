@@ -16,6 +16,9 @@ obj:setText('meow')
 obj:setSize(2, 2)
 obj:setMargin(4)
 
+-- text input
+page:newTextInput():setText('hello world')--:setMargin(4)
+
 -- create text with figura triangle as text
 page:newToggle():setText({text = '△', font = 'figura:badges'}):setMargin(-10)
 
@@ -54,12 +57,12 @@ page2:newSlider():setRange(10, 30)
 page2:setTheme({
    icons = textures['example_icons'],
 
-   render = function(model, time, chatOffset, pageZoom)
+   render = function(model, time, chatOffset, pageAnim)
       local pos = client:getScaledWindowSize() * vec(0.5, 1)
       pos.x = pos.x + 95
       pos.y = pos.y + 8 - (1 - (1 - time) ^ 3) * 10
       pos.y = pos.y - chatOffset * 14
-      pos.x = pos.x - pageZoom * 16
+      pos.x = pos.x - pageAnim * 16
       model:setPos(-pos.xy_)
       model:setScale(1)
    end,

@@ -5,22 +5,29 @@ if not host:isHost() then return setmetatable({}, {__index = function() error('p
 local panelsHud = models:newPart('panelsHud', 'Hud')
 
 --- @class panelsApi
-local panelsApi = {history = {}}
+local panelsApi = {}
 --- @class panelsElementDefault
 local defaultElementMethods = {}
-local pages = {}
-local currentPage = nil
-local elements = {}
-local needReload = false
-local selected, selectedFull, selectedWithMouse = 0, 0, false
+
 local panelsEnabled = false
-local panelsEnableTime, panelsOldEnableTime = 0, 0
-local chatOffset, oldChatOffset = 0, 0
-local pageZoom, oldPageZoom = 0, 0
-local animations = {}
-local panelsPos = vec(0, 0)
+local elements = {}
+local pages = {}
+local pageHistory = {}
+local currentPage = nil
+
+-- input
+local selected, selectedFull, selectedWithMouse = 0, 0, false
+local textInputElement = nil
 local oldMousePos, mousePos = vec(0, 0), vec(0, 0)
 local lastMinecraftScreen = nil
+
+-- rendering
+local needReload = false
+local panelsEnableTime, panelsOldEnableTime = 0, 0
+local chatOffset, oldChatOffset = 0, 0
+local pageAnim, oldPageAnim = 0, 0
+local panelsPos = vec(0, 0)
+local animations = {}
 
 -- theme
 local defaultTheme = require(.....'.theme')
@@ -94,24 +101,25 @@ function panelsApi.setPage(page, keepHistory, dontAddToHistory, reverseZoomAnima
       end
    end
    selectedFull = selected
-   -- zoom animation
+   textInputElement = nil
+   -- page animation
    if reverseZoomAnimation then
-      pageZoom, oldPageZoom = 0.6, 1
+      pageAnim, oldPageAnim = 0.6, 1
    else
-      pageZoom, oldPageZoom = -0.6, -1
+      pageAnim, oldPageAnim = -0.6, -1
    end
    -- update history
-   if not keepHistory then panelsApi.history = {} end
-   if not dontAddToHistory then table.insert(panelsApi.history, currentPage) end
+   if not keepHistory then pageHistory = {} end
+   if not dontAddToHistory then table.insert(pageHistory, currentPage) end
    -- on open
    if currentPage.openFunc then currentPage.openFunc(currentPage) end
 end
 
 --- goes to previous page
 function panelsApi.previousPage()
-   if #panelsApi.history >= 2 then
-      table.remove(panelsApi.history)
-      local page = panelsApi.history[#panelsApi.history]
+   if #pageHistory >= 2 then
+      table.remove(pageHistory)
+      local page = pageHistory[#pageHistory]
       panelsApi.setPage(page, true, true, true, page.lastSelectedElement)
    end
 end
@@ -432,8 +440,8 @@ function events.tick()
    panelsEnableTime = math.clamp(panelsEnableTime + (panelsEnabled and 0.25 or -0.25), 0, 1)
    oldChatOffset = chatOffset
    chatOffset = math.lerp(chatOffset, host:isChatOpen() and 1 or 0, 0.25)
-   oldPageZoom = pageZoom
-   pageZoom = pageZoom * 0.6
+   oldPageAnim = pageAnim
+   pageAnim = pageAnim * 0.6
    -- element animations
    for i, v in pairs(animations) do
       local haveAnimations = false
@@ -539,7 +547,7 @@ function events.world_render(delta)
       panelsHud,
       panelsTime,
       chatOffsetTime,
-      math.lerp(oldPageZoom, pageZoom, delta)
+      math.lerp(oldPageAnim, pageAnim, delta)
    )
    panelsPos = -panelsHud:getPos().xy or vec(0, 0)
    if needReload then
