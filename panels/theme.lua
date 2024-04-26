@@ -34,5 +34,8 @@ return host:isHost() and {
 
    returnDefault = '#fc5454',
    returnSelected = '#ffaaba',
-   returnPressed = '#891e2b'
+   returnPressed = '#891e2b',
+
+   textInputPlaceHolder = '#545454',
+   textInputPlaceHolderSelected = '#8b8b8b'
 }

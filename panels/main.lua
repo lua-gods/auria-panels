@@ -17,7 +17,7 @@ local currentPage = nil
 
 -- input
 local selected, selectedFull, selectedWithMouse = 0, 0, false
-local textInputElement = nil
+panelsApi.textInputElement = nil
 local oldMousePos, mousePos = vec(0, 0), vec(0, 0)
 local lastMinecraftScreen = nil
 
@@ -29,7 +29,7 @@ local pageAnim, oldPageAnim = 0, 0
 local panelsPos = vec(0, 0)
 local animations = {}
 
--- theme
+--#region theme
 local defaultTheme = require(.....'.theme')
 local globalTheme = {}
 local theme = {}
@@ -52,7 +52,8 @@ setmetatable(theme.rgb, {
       return vType == 'Vector3' and v or vType == 'string' and vectors.hexToRGB(v) or v
    end
 })
-
+--#endregion
+--#region panels methods
 --- @class panelsPage
 local pageApi = {elements = {}}
 local pageMetatable = {__index = pageApi}
@@ -101,7 +102,7 @@ function panelsApi.setPage(page, keepHistory, dontAddToHistory, reverseZoomAnima
       end
    end
    selectedFull = selected
-   textInputElement = nil
+   panelsApi.textInputElement = nil
    -- page animation
    if reverseZoomAnimation then
       pageAnim, oldPageAnim = 0.6, 1
@@ -147,14 +148,16 @@ end
 --- @param name string
 --- @param duration number
 --- @param func fun(time: number, obj: panelsElementDefault, model: ModelPart, tasks: table<string, RenderTask>)
-function panelsApi.anim(obj, name, duration, func)
+--- @param finishFunc? fun(obj: panelsElementDefault, model: ModelPart, tasks: table<string, RenderTask>)
+function panelsApi.anim(obj, name, duration, func, finishFunc)
    if not animations[obj] then
       animations[obj] = {}
    end
    animations[obj][name] = {
       time = 0,
       duration = duration,
-      func = func
+      func = func,
+      finishFunc = finishFunc
    }
 end
 
@@ -178,11 +181,17 @@ function panelsApi.newElement(name, page)
 end
 
 --- sets global theme for panels, check panels/theme.lua for default theme, giving nil as input will remove global theme
---- @param tbl table|nil
+--- @param tbl table?
 function panelsApi.setTheme(tbl)
    globalTheme = tbl or {}
 end
 
+function panelsApi.setTextInputElement(obj)
+   panelsApi.textInputElement = elements[obj.type].textInput and obj or nil
+end
+
+--#endregion
+--#region page
 --- removes element from page 
 --- @param i number
 --- @return self
@@ -223,6 +232,9 @@ function pageApi:setTheme(tbl)
    self.theme = tbl or {}
    return self
 end
+
+--#endregion
+--#region default element method
 
 ---sets pos of element, returns itself for self chaining
 ---@generic self
@@ -300,6 +312,7 @@ function defaultElementMethods:setIcon(texture, uv, selectUv, pressUv)
    panelsApi.reload()
    return self
 end
+--#endregion
 
 -- load elements
 for _, file in pairs(listFiles(..., false)) do
@@ -321,7 +334,7 @@ for _, file in pairs(listFiles(..., false)) do
    end
 end
 
--- controls
+--#region controls
 local function selectElementAnim(time, obj, model, tasks)
    -- easing
    local c1, c3 = 1.7, 2.7
@@ -380,14 +393,13 @@ panelsClick.release = panelsApi.reload
 
 local mouseClick = keybinds:newKeybind('panels - mouse click', 'key.mouse.left', true)
 mouseClick.press = function()
-   if host:isChatOpen() and selectedWithMouse then
-      local obj = currentPage.elements[selectedFull]
-      if obj and elements[obj.type].press then
-         elements[obj.type].press(obj)
-      end
-      panelsApi.reload()
-      return true
+   if not host:isChatOpen() or not selectedWithMouse then return end
+   local obj = currentPage.elements[selectedFull]
+   if obj and elements[obj.type].press then
+      elements[obj.type].press(obj)
    end
+   panelsApi.reload()
+   return true
 end
 
 mouseClick.release = panelsApi.reload
@@ -395,23 +407,31 @@ mouseClick.release = panelsApi.reload
 -- shift
 local shift = keybinds:newKeybind('panels - shift', 'key.keyboard.left.shift', true)
 shift.press = function()
-   if panelsEnabled and currentPage then
-      return panelsClick:isPressed()
-   end
+   if not panelsEnabled then return end
+   if not currentPage then return end
+   if panelsApi.textInputElement then return true end
+   return panelsClick:isPressed()
 end
 
 -- close panel
 local escKey = keybinds:newKeybind('panels - close', 'key.keyboard.escape')
 escKey.press = function()
-   if panelsEnabled and not lastMinecraftScreen then
+   if not panelsEnabled then return end
+   if panelsApi.textInputElement then
+      local obj = panelsApi.textInputElement
+      elements[obj.type].textInput(obj, nil, 'cancel')
+      panelsApi.textInputElement = nil
+      panelsApi.reload()
+   elseif not lastMinecraftScreen then
       panelsEnabled = false
-      return true
    end
+   return true
 end
 
 -- scroll
 function events.mouse_scroll(dir)
    if not panelsEnabled or not currentPage then return end
+   if panelsApi.textInputElement then return end
    if host:isChatOpen() then
       local obj = currentPage.elements[selectedFull]
       if obj and selectedWithMouse and elements[obj.type].scroll then
@@ -432,6 +452,27 @@ function events.mouse_scroll(dir)
    end
 end
 
+-- keyboard
+function events.char_typed(char, modifier)
+   if not panelsApi.textInputElement then return end
+   if panelsClick:isPressed() then return end
+   local obj = panelsApi.textInputElement
+   elements[obj.type].textInput(obj, char, nil, modifier)
+   panelsApi.reload()
+end
+
+function events.key_press(key, action, modifier)
+   if not panelsApi.textInputElement then return end
+   if action == 0 then return end
+
+   local obj = panelsApi.textInputElement
+   local override = elements[obj.type].textInput(obj, nil, key, modifier)
+   panelsApi.reload()
+
+   return key >= 0 and key <= 255 or override
+end
+
+--#endregion
 -- rendering
 function events.tick()
    lastMinecraftScreen = host:getScreen()
@@ -443,25 +484,31 @@ function events.tick()
    oldPageAnim = pageAnim
    pageAnim = pageAnim * 0.6
    -- element animations
-   for i, v in pairs(animations) do
+   for obj, anims in pairs(animations) do
       local haveAnimations = false
-      for i2, v2 in pairs(v) do
-         v2.time = v2.time + 1
-         if v2.time > v2.duration + 2 then
-            animations[i2] = nil
-         else
-            haveAnimations = true
+      for name, data in pairs(anims) do
+         haveAnimations = true
+         data.time = data.time + 1
+         if data.time > data.duration then
+            -- remove animation
+            anims[name] = nil
+            -- make sure last frame is rendered
+            local model = obj.renderData.elementModel
+            local tasks = model:getTask()
+            data.func(1, obj, model, tasks)
+            -- call finish
+            if data.finishFunc then data.finishFunc(obj, model, tasks) end
          end
       end
       if not haveAnimations then
-         animations[i] = nil
+         animations[obj] = nil
       end
    end
    -- mouse
    if not host:isChatOpen() then
       selectedWithMouse = false
       return
-   elseif not currentPage then
+   elseif not currentPage or panelsApi.textInputElement then
       return
    end
    oldMousePos = mousePos
@@ -508,7 +555,7 @@ local function updateElement(i, v)
       text = '',
       color = isPressed and theme.pressed or isSelected and theme.selected or theme.default,
       extra = {v.text}
-   }))
+   })):setOutlineColor(theme.rgb.outline)
    if v.icon then
       tasks.icon:setVisible(true)
       model:setPos(-9, 0, 0)
