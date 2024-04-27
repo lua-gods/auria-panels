@@ -17,7 +17,11 @@ obj:setSize(2, 2)
 obj:setMargin(4)
 
 -- text input
-page:newTextInput():setText('hello world')--:setMargin(4)
+page:newTextInput()
+   :setText('hello world')
+   :onInputAccepted(function(text, self) host:setActionbar('acepted ' .. text) end)
+   :onInputCanceled(function(text, self) host:setActionbar('canceled ' .. text) end)
+   :onInputChanged(function(text, self) host:setActionbar('changed ' .. text) end)
 
 -- create text with figura triangle as text
 page:newToggle():setText({text = '△', font = 'figura:badges'}):setMargin(-10)

@@ -7,6 +7,7 @@ local panelsHud = models:newPart('panelsHud', 'Hud')
 --- @class panelsApi
 local panelsApi = {}
 --- @class panelsElementDefault
+---@field type string
 local defaultElementMethods = {}
 
 local panelsEnabled = false
@@ -102,7 +103,7 @@ function panelsApi.setPage(page, keepHistory, dontAddToHistory, reverseZoomAnima
       end
    end
    selectedFull = selected
-   panelsApi.textInputElement = nil
+   panelsApi.setTextInputElement()
    -- page animation
    if reverseZoomAnimation then
       pageAnim, oldPageAnim = 0.6, 1
@@ -172,7 +173,7 @@ function panelsApi.newElement(name, page)
       size = vec(1, 1),
       margin = 0,
       text = '',
-      icon = nil -- {texture = texture, uv = Vector4}
+      icon = nil -- {texture = texture, uv = Vector4},
    }
    setmetatable(obj, elements[name].metatable)
    table.insert(page.elements, obj)
@@ -186,8 +187,20 @@ function panelsApi.setTheme(tbl)
    globalTheme = tbl or {}
 end
 
-function panelsApi.setTextInputElement(obj)
-   panelsApi.textInputElement = elements[obj.type].textInput and obj or nil
+--- sets text input if obj is nil or doesnt support text input it will turn off text input
+--- @param obj panelsElementDefault?
+--- @param noEvent boolean?
+function panelsApi.setTextInputElement(obj, noEvent)
+   if obj and elements[obj.type].textInput then
+      panelsApi.textInputElement = obj
+      host:setChatText('')
+   else
+      obj = panelsApi.textInputElement
+      if panelsApi.textInputElement and elements[obj.type].textInputFinished and not noEvent then
+         elements[obj.type].textInputFinished(obj)
+      end
+      panelsApi.textInputElement = nil
+   end
 end
 
 --#endregion
@@ -420,7 +433,7 @@ escKey.press = function()
    if panelsApi.textInputElement then
       local obj = panelsApi.textInputElement
       elements[obj.type].textInput(obj, nil, 'cancel')
-      panelsApi.textInputElement = nil
+      panelsApi.setTextInputElement()
       panelsApi.reload()
    elseif not lastMinecraftScreen then
       panelsEnabled = false
@@ -463,6 +476,7 @@ end
 
 function events.key_press(key, action, modifier)
    if not panelsApi.textInputElement then return end
+   host:setChatText('')
    if action == 0 then return end
 
    local obj = panelsApi.textInputElement
@@ -508,12 +522,10 @@ function events.tick()
    if not host:isChatOpen() then
       selectedWithMouse = false
       return
-   elseif not currentPage or panelsApi.textInputElement then
-      return
    end
    oldMousePos = mousePos
    mousePos = panelsPos - client:getMousePos() / client:getGuiScale()
-   if mouseClick:isPressed() and selectedWithMouse then
+   if mouseClick:isPressed() and selectedWithMouse and not panelsApi.textInputElement then
       local obj = currentPage.elements[selectedFull]
       if obj and elements[obj.type].scroll then
          local dir = oldMousePos.x - mousePos.x
@@ -535,6 +547,12 @@ function events.tick()
             end
          end
       end
+   end
+   if panelsApi.textInputElement then
+      if closest ~= selected and mouseClick:isPressed() then
+         panelsApi.setTextInputElement()
+      end
+      return
    end
    if closest then
       setSelected(closest, true)
