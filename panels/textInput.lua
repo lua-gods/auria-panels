@@ -4,6 +4,7 @@ local myPageApi = {}
 --- @class panelsApi 
 local panels = {}
 --- @class panelsElementTextInput : panelsElementDefault
+--- @field value string
 local methods = {}
 local api = {page = myPageApi, methods = methods}
 local whitePixel = textures.whitePixel or textures:newTexture('whitePixel', 1, 1):pixel(0, 0, 1, 1, 1)
@@ -97,6 +98,11 @@ function methods:onInputChanged(func)
    return self
 end
 
+---returns text typed into text input
+---@return string
+function methods:getValue()
+   return self.value
+end
 
 -- rendering
 function api.createModel(model)
