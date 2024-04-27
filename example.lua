@@ -42,6 +42,9 @@ page:newColorPicker():onColorChange(function(a)
    printJson('{"text":"'..tostring(a)..'","color":"#'..vectors.rgbToHex(a)..'"}')
 end):setColor(1, 0.5, 0):setText('meow')
 
+-- glass theme experiment
+page:newToggle():setText('glass theme'):onToggle(require('glass'))
+
 -- button to switch to different page
 page:newPageRedirect():setText('test'):setPage('test')
 
