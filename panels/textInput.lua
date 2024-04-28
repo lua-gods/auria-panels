@@ -98,10 +98,12 @@ function methods:onInputChanged(func)
    return self
 end
 
----returns text typed into text input
----@return string
-function methods:getValue()
-   return self.value
+---sets text typed into text input
+---@param text string
+---@return self
+function methods:setValue(text)
+   self.value = text
+   return self
 end
 
 -- rendering
