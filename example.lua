@@ -18,7 +18,7 @@ obj:setMargin(4)
 
 -- text input
 page:newTextInput()
-   :setText('hello world')
+   :setText('hello world meow')
    :onInputAccepted(function(text, self) host:setActionbar('acepted ' .. text) end)
    :onInputCanceled(function(text, self) host:setActionbar('canceled ' .. text) end)
    :onInputChanged(function(text, self) host:setActionbar('changed ' .. text) end)

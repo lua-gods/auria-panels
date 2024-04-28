@@ -118,7 +118,8 @@ local function getTextWidth(str)
 end
 
 function api.renderElement(obj, isSelected, isPressed, model, tasks)
-   local text = obj.value
+   local isPlaceHolder = obj.value == ''
+   local text = isPlaceHolder and obj.text or obj.value
    local textWidth = getTextWidth(text)
    local lineWidth = math.clamp(textWidth, 64, 128)
    if textWidth > 118 then
@@ -136,12 +137,11 @@ function api.renderElement(obj, isSelected, isPressed, model, tasks)
       textWidth = getTextWidth(text)
    end
 
-   tasks.cursor:setPos(-textWidth, 0, -2)
+   tasks.cursor:setPos(isPlaceHolder and 0 or -textWidth, 0, -2)
    
    tasks.lineOutline:setColor(panels.theme.rgb.outline):setScale(lineWidth + 2, 1, 1)
    tasks.line:setColor(obj == panels.textInputElement and panels.theme.rgb.selected or panels.theme.rgb.default):setScale(lineWidth, 1, 1)
    
-   local isPlaceHolder = obj.value == ''
    local color
    if isPlaceHolder then
       color = isSelected and panels.theme.textInputPlaceHolderSelected or panels.theme.textInputPlaceHolder
@@ -151,7 +151,7 @@ function api.renderElement(obj, isSelected, isPressed, model, tasks)
    tasks.text:setText(toJson({
       text = '',
       color = color,
-      extra = {isPlaceHolder and obj.text or text}
+      extra = {text}
    }))
 
    return 12
