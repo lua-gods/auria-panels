@@ -82,8 +82,10 @@ function panelsApi.setPage(page, keepHistory, dontAddToHistory, reverseZoomAnima
    if currentPage then
       currentPage.lastSelectedElement = selectedFull
       for i, v in pairs(currentPage.elements) do
-         panelsHud:removeChild(v.renderData.model)
-         v.renderData = nil
+         if v.renderData then
+            panelsHud:removeChild(v.renderData.model)
+            v.renderData = nil
+         end
       end
    end
    -- set page
@@ -503,7 +505,7 @@ function events.tick()
       for name, data in pairs(anims) do
          haveAnimations = true
          data.time = data.time + 1
-         if data.time > data.duration then
+         if data.time > data.duration and obj.renderData then
             -- remove animation
             anims[name] = nil
             -- make sure last frame is rendered
