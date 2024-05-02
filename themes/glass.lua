@@ -1,7 +1,6 @@
 if not host:isHost() then return end
 local theme = {}
 local panels = require('panels.main')
-local themeEnabled = false
 
 local function screenToWorldSpace(distance, pos, fov, fovErr)
    local mat = matrices.mat4()
@@ -66,14 +65,9 @@ theme.renderElements = function(elements, updateElement, selected)
 end
 
 function events.tick()
-   if themeEnabled then
+   if panels.getTheme() then
       panels.reload()
    end
 end
 
-local function setTheme(x)
-   themeEnabled = x
-   panels.setTheme(x and theme or nil)
-end
-
-return setTheme
+return theme

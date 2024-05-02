@@ -11,10 +11,12 @@ local page = panels.newPage('main')
 panels.setPage(page)
 
 -- create new text element with text 'meow' and size 2, 2
-local obj = page:newText()
-obj:setText('meow')
-obj:setSize(2, 2)
-obj:setMargin(4)
+do
+   local obj = page:newText()
+   obj:setText('meow')
+   obj:setSize(2, 2)
+   obj:setMargin(4)
+end
 
 -- text input
 page:newTextInput()
@@ -42,8 +44,30 @@ page:newColorPicker():onColorChange(function(a)
    printJson('{"text":"'..tostring(a)..'","color":"#'..vectors.rgbToHex(a)..'"}')
 end):setColor(1, 0.5, 0):setText('meow')
 
--- glass theme experiment
-page:newToggle():setText('glass theme'):onToggle(require('glass'))
+-- theme menu to test themes :3
+do
+   local themePage = panels.newPage()
+   page:newPageRedirect():setPage(themePage):setText('themes')
+   local enabledElement
+   enabledElement = themePage:newToggle():setText('default'):setToggled(true):onToggle(function(_, v)
+      enabledElement:setToggled(false)
+      v:setToggled(true)
+      enabledElement = v
+      panels.setTheme()
+   end)
+   for _, path in pairs(listFiles('themes', true)) do
+      local theme = require(path)
+      local name = path:match('[^/.]*$')
+      local obj = themePage:newToggle():setText(name)
+      obj:onToggle(function()
+         obj:setToggled(true)
+         enabledElement:setToggled(false)
+         enabledElement = obj:setToggled(true)
+         panels.setTheme(theme)
+      end)
+   end
+   themePage:newReturnButton()
+end
 
 -- button to switch to different page
 page:newPageRedirect():setText('test'):setPage('test')

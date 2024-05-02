@@ -1,0 +1,1 @@
+few example themes for panels, code for changing theme is in example.lua

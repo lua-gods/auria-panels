@@ -189,6 +189,12 @@ function panelsApi.setTheme(tbl)
    globalTheme = tbl or {}
 end
 
+--- gets global theme for panels, returns empty table if no theme found
+--- @return table
+function panelsApi.getTheme()
+   return globalTheme
+end
+
 --- sets text input if obj is nil or doesnt support text input it will turn off text input
 --- @param obj panelsElementDefault?
 --- @param noEvent boolean?
