@@ -3,12 +3,12 @@ return host:isHost() and {
 
    on = '#a6e3a1',
    off = '#f38ba8',
-   outline = '#313244',
+   outline = '#1e1e2e',
 
    sliderTextLight = '#cdd6f4',
-   sliderTextDark = '#313244',
+   sliderTextDark = '#1e1e2e',
    sliderDefault = '#cba6f7',
-   sliderOutline = '#313244',
+   sliderOutline = '#1e1e2e',
 
    default = '#a6adc8',
    selected = '#cdd6f4',

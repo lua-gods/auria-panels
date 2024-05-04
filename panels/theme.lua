@@ -1,9 +1,16 @@
 return host:isHost() and {
-   render = function(model, time, chatOffset, pageAnim)
+   updateOffsets = function(old, new)
+      new.chat = math.lerp(old.chat or 0, host:isChatOpen() and 1 or 0, 0.25)
+      new.offHandSlot = math.lerp(old.offHandSlot or 0, player:isLeftHanded() and player:getItem(2).id ~= 'minecraft:air' and 1 or 0, 0.25)
+   end,
+   render = function(model, time, offsets, pageAnim)
       local pos = client:getScaledWindowSize() * vec(0.5, 1)
       pos.x = pos.x + 95
       pos.y = pos.y + 8 - (1 - (1 - time) ^ 3) * 10
-      pos.y = pos.y - chatOffset * 14
+      pos.y = pos.y - math.max(
+         -(math.cos(math.pi * offsets.chat) - 1) * 7,
+         -(math.cos(math.pi * offsets.offHandSlot) - 1) * 11
+      )
       model:setPos(-pos.xy_)
       model:setScale(1 + pageAnim * 0.2)
    end,

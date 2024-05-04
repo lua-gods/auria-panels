@@ -88,11 +88,14 @@ page2:newSlider():setRange(10, 30)
 page2:setTheme({
    icons = textures['example_icons'],
 
-   render = function(model, time, chatOffset, pageAnim)
+   render = function(model, time, offsets, pageAnim)
       local pos = client:getScaledWindowSize() * vec(0.5, 1)
       pos.x = pos.x + 95
       pos.y = pos.y + 8 - (1 - (1 - time) ^ 3) * 10
-      pos.y = pos.y - chatOffset * 14
+      pos.y = pos.y - math.max(
+         -(math.cos(math.pi * offsets.chat) - 1) * 7,
+         -(math.cos(math.pi * offsets.offHandSlot) - 1) * 12
+      )
       pos.x = pos.x - pageAnim * 16
       model:setPos(-pos.xy_)
       model:setScale(1)
@@ -103,7 +106,7 @@ page2:setTheme({
 local page3 = panels.newPage('mrrooww')
 
 page3:setTheme({
-   render = function(model, time, chatOffset, pageZoom)
+   render = function(model, time, _, pageZoom)
       local pos = client:getScaledWindowSize() * vec(0.5, 0)
       time = (1 - time) ^ 3
       pos.y = 64 - (1 - time) * 32

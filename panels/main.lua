@@ -25,10 +25,16 @@ local lastMinecraftScreen = nil
 -- rendering
 local needReload = false
 local panelsEnableTime, panelsOldEnableTime = 0, 0
-local chatOffset, oldChatOffset = 0, 0
 local pageAnim, oldPageAnim = 0, 0
 local panelsPos = vec(0, 0)
 local animations = {}
+local panelOffsets, oldPanelOffsets = {}, {}
+local panelOffsetDelta = 0
+local panelOffsetsLerped = setmetatable({}, {
+   __index = function(_, i)
+      return math.lerp(oldPanelOffsets[i] or 0, panelOffsets[i] or 0, panelOffsetDelta)
+   end
+})
 
 --#region theme
 local defaultTheme = require(.....'.theme')
@@ -501,8 +507,9 @@ function events.tick()
    -- panels animations
    panelsOldEnableTime = panelsEnableTime
    panelsEnableTime = math.clamp(panelsEnableTime + (panelsEnabled and 0.25 or -0.25), 0, 1)
-   oldChatOffset = chatOffset
-   chatOffset = math.lerp(chatOffset, host:isChatOpen() and 1 or 0, 0.25)
+   oldPanelOffsets = panelOffsets
+   panelOffsets = {}
+   theme.updateOffsets(oldPanelOffsets, panelOffsets)
    oldPageAnim = pageAnim
    pageAnim = pageAnim * 0.6
    -- element animations
@@ -614,12 +621,13 @@ function events.world_render(delta)
    panelsHud:setVisible(panelsTime > 0)
    if panelsTime == 0 then return end
    -- render panels
-   local chatOffsetTime = math.lerp(oldChatOffset, chatOffset, delta)
-   chatOffsetTime = -(math.cos(math.pi * chatOffsetTime) - 1) / 2
+   -- local chatOffsetTime = math.lerp(oldChatOffset, chatOffset, delta)
+   -- chatOffsetTime = -(math.cos(math.pi * chatOffsetTime) - 1) / 2
+   panelOffsetDelta = delta
    theme.render(
       panelsHud,
       panelsTime,
-      chatOffsetTime,
+      panelOffsetsLerped,
       math.lerp(oldPageAnim, pageAnim, delta)
    )
    panelsPos = -panelsHud:getPos().xy or vec(0, 0)
