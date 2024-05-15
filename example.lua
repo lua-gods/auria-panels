@@ -96,8 +96,9 @@ page2:setTheme({
          -(math.cos(math.pi * offsets.chat) - 1) * 7,
          -(math.cos(math.pi * offsets.offHandSlot) - 1) * 12
       )
+      pos.x = pos.x - pageAnim * 16
       model:setPos(-pos.xy_)
-      model:setScale(1 + pageAnim * 0.2)
+      model:setScale(1)
    end,
 })
 

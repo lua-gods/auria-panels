@@ -33,7 +33,7 @@ theme.render = function(model, time, offsets, pageAnim)
       -(math.cos(math.pi * offsets.offHandSlot) - 1) * 11
    )
    model:setPos(-pos.xy_)
-   pos.x = pos.x - pageAnim * 16
+   model:setScale(1 + pageAnim * 0.2)
    panelsPos = pos
 end
 
