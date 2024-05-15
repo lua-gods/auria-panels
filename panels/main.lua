@@ -21,6 +21,7 @@ local selected, selectedFull, selectedWithMouse = 0, 0, false
 panelsApi.textInputElement = nil
 local oldMousePos, mousePos = vec(0, 0), vec(0, 0)
 local lastMinecraftScreen = nil
+local clickOpenedPanels = false
 
 -- rendering
 local needReload = false
@@ -412,11 +413,15 @@ panelsClick.press = function()
       panelsApi.reload()
    else
       panelsEnabled = true
+      clickOpenedPanels = true
    end
    return true
 end
 
-panelsClick.release = panelsApi.reload
+panelsClick.release = function()
+   clickOpenedPanels = false
+   panelsApi.reload()
+end
 
 local mouseClick = keybinds:newKeybind('panels - mouse click', 'key.mouse.left', true)
 mouseClick.press = function()
@@ -459,6 +464,7 @@ end
 function events.mouse_scroll(dir)
    if not panelsEnabled or not currentPage then return end
    if panelsApi.textInputElement then return end
+   if clickOpenedPanels then return end
    if host:isChatOpen() then
       local obj = currentPage.elements[selectedFull]
       if obj and selectedWithMouse and elements[obj.type].scroll then
@@ -580,7 +586,7 @@ end
 
 local function updateElement(i, v)
    local isSelected = i == selectedFull
-   local isPressed = i == selectedFull and (host:isChatOpen() and mouseClick:isPressed() or panelsClick:isPressed())
+   local isPressed = not clickOpenedPanels and i == selectedFull and (host:isChatOpen() and mouseClick:isPressed() or panelsClick:isPressed())
    local model = v.renderData.elementModel
    local tasks = model:getTask()
    -- update text and icon
@@ -621,8 +627,6 @@ function events.world_render(delta)
    panelsHud:setVisible(panelsTime > 0)
    if panelsTime == 0 then return end
    -- render panels
-   -- local chatOffsetTime = math.lerp(oldChatOffset, chatOffset, delta)
-   -- chatOffsetTime = -(math.cos(math.pi * chatOffsetTime) - 1) / 2
    panelOffsetDelta = delta
    theme.render(
       panelsHud,

@@ -11,8 +11,8 @@ return host:isHost() and {
          -(math.cos(math.pi * offsets.chat) - 1) * 7,
          -(math.cos(math.pi * offsets.offHandSlot) - 1) * 11
       )
+      pos.x = pos.x - pageAnim * 16
       model:setPos(-pos.xy_)
-      model:setScale(1 + pageAnim * 0.2)
    end,
    renderElements = function(elements, updateElement, selected)
       local currentHeight = 0

@@ -25,16 +25,16 @@ end
 
 local panelsPos = vec(0, 0)
 theme.render = function(model, time, offsets, pageAnim)
-   local pos = client.getScaledWindowSize() * vec(0.5, 1)
+   local pos = client:getScaledWindowSize() * vec(0.5, 1)
    pos.x = pos.x + 95
    pos.y = pos.y + 8 - (1 - (1 - time) ^ 3) * 10
    pos.y = pos.y - math.max(
       -(math.cos(math.pi * offsets.chat) - 1) * 7,
-      -(math.cos(math.pi * offsets.offHandSlot) - 1) * 12
+      -(math.cos(math.pi * offsets.offHandSlot) - 1) * 11
    )
-   panelsPos = pos
    model:setPos(-pos.xy_)
-   model:setScale(1 + pageAnim * 0.2)
+   pos.x = pos.x - pageAnim * 16
+   panelsPos = pos
 end
 
 theme.renderElements = function(elements, updateElement, selected)
@@ -68,7 +68,7 @@ theme.renderElements = function(elements, updateElement, selected)
 end
 
 function events.tick()
-   if panels.getTheme() then
+   if panels.getTheme() == theme then
       panels.reload()
    end
 end

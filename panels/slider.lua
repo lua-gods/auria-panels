@@ -31,13 +31,14 @@ function api.scroll(obj, dir, shift)
    dir = dir + obj.scrollOffset
    obj.scrollOffset = dir % 1
    dir = math.floor(dir)
+   local oldValue = obj.value
    obj.value = obj.value + dir * (shift and obj.preciseStep or obj.step)
    if obj.warp then
       obj.value = (obj.value - obj.min) % (obj.max - obj.min) + obj.min
    else
       obj.value = math.clamp(obj.value, obj.min, obj.max)
    end
-   if obj.scroll then
+   if obj.scroll and obj.value ~= oldValue then
       obj.scroll(obj.value, obj)
    end
 end
