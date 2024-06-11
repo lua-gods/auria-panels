@@ -1,5 +1,5 @@
 # panels
-A simple ui (similiar to panels by [@GNamimates](https://github.com/GNamimates)) made for minecraft [figura](https://github.com/figuraMC/figura) mod
+A simple ui (similar to panels by [@GNamimates](https://github.com/GNamimates)) made for minecraft [figura](https://github.com/figuraMC/figura) mod
 
 ## installation
 Download this repository and copy `panels` folder to your avatar
