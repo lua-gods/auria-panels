@@ -238,7 +238,9 @@ end
 function pageApi:clear()
    if currentPage == self then
       for i, v in pairs(self.elements) do
-         panelsHud:removeChild(v.renderData.model)
+         if v.renderData then
+            panelsHud:removeChild(v.renderData.model)
+         end
       end
    end
    self.elements = {}

@@ -102,6 +102,22 @@ page2:setTheme({
    end,
 })
 
+-- test page
+do
+   local testPage = panels.newPage()
+   testPage:onOpen(function()
+      testPage:clear()
+
+      for _ = 1, 4 do
+         testPage:newText():setText(tostring(math.random()))
+      end
+
+      testPage:newReturnButton()
+   end)
+
+   page:newPageRedirect():setText('test page'):setPage(testPage)
+end
+
 -- create mrrowww page
 local page3 = panels.newPage('mrrooww')
 
