@@ -348,7 +348,7 @@ end
 ---@param self self
 ---@param func fun(obj: panelsElementDefault)?
 ---@return self
-function defaultElementMethods:setOnSelect(func)
+function defaultElementMethods:onSelect(func)
    self.selectFunc = func
    return self
 end
@@ -358,7 +358,7 @@ end
 ---@param self self
 ---@param func fun(obj: panelsElementDefault)?
 ---@return self
-function defaultElementMethods:setOnUnselect(func)
+function defaultElementMethods:onUnselect(func)
    self.unselectFunc = func
    return self
 end
