@@ -99,6 +99,17 @@ function panelsApi.setPage(page, keepHistory, dontAddToHistory, reverseZoomAnima
    currentPage = pages[page] or page --- @cast currentPage panelsPage
    panelsApi.reload()
    animations = {}
+   -- page animation
+   if reverseZoomAnimation then
+      pageAnim, oldPageAnim = 0.6, 1
+   else
+      pageAnim, oldPageAnim = -0.6, -1
+   end
+   -- update history
+   if not keepHistory then pageHistory = {} end
+   if not dontAddToHistory then table.insert(pageHistory, currentPage) end
+   -- on open
+   if currentPage.openFunc then currentPage.openFunc(currentPage) end
    -- change selected element
    if selectedElement then
       selected = selectedElement
@@ -113,17 +124,6 @@ function panelsApi.setPage(page, keepHistory, dontAddToHistory, reverseZoomAnima
    end
    selectedFull = selected
    panelsApi.setTextInputElement()
-   -- page animation
-   if reverseZoomAnimation then
-      pageAnim, oldPageAnim = 0.6, 1
-   else
-      pageAnim, oldPageAnim = -0.6, -1
-   end
-   -- update history
-   if not keepHistory then pageHistory = {} end
-   if not dontAddToHistory then table.insert(pageHistory, currentPage) end
-   -- on open
-   if currentPage.openFunc then currentPage.openFunc(currentPage) end
 end
 
 --- goes to previous page
@@ -342,6 +342,26 @@ function defaultElementMethods:setIcon(texture, uv, selectUv, pressUv)
    panelsApi.reload()
    return self
 end
+
+--- set function that will be called when element is selected, returns itself for chaining
+---@generic self
+---@param self self
+---@param func fun(obj: panelsElementDefault)?
+---@return self
+function defaultElementMethods:setOnSelect(func)
+   self.selectFunc = func
+   return self
+end
+
+--- set function that will be called when element is unselected,returns itself for chaining
+---@generic self
+---@param self self
+---@param func fun(obj: panelsElementDefault)?
+---@return self
+function defaultElementMethods:setOnUnselect(func)
+   self.unselectFunc = func
+   return self
+end
 --#endregion
 
 -- load elements
@@ -391,12 +411,16 @@ local function setSelected(new, mouse)
    if oldSelectedFull ~= selectedFull then
       panelsApi.reload()
       -- unselect
-      if currentPage.elements[oldSelectedFull] then
-         panelsApi.anim(currentPage.elements[oldSelectedFull], 'selectElementAnim', 6, unselectElementAnim)
+      local oldElement = currentPage.elements[oldSelectedFull]
+      if oldElement then
+         panelsApi.anim(oldElement, 'selectElementAnim', 6, unselectElementAnim)
+         if oldElement.unselectFunc then oldElement:unselectFunc() end
       end
       -- select
-      if currentPage.elements[selectedFull] then
-         panelsApi.anim(currentPage.elements[selectedFull], 'selectElementAnim', 6, selectElementAnim)
+      local newElement = currentPage.elements[selectedFull]
+      if newElement then
+         panelsApi.anim(newElement, 'selectElementAnim', 6, selectElementAnim)
+         if newElement.selectFunc then newElement:selectFunc() end
       end
    end
 end

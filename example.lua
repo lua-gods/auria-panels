@@ -78,8 +78,8 @@ local page2 = panels.newPage('test')
 -- some random example toggle
 page2:newToggle():setText('always on'):onToggle(function(_, self) self:setToggled(true) end):setToggled(true)
 page2:newToggle():setText('always off'):onToggle(function(_, self) self:setToggled(false) end)
-page2:newToggle():setText('toggle 3')
-page2:newToggle():setText('toggle 4')
+page2:newToggle():setText('toggle 3'):setOnSelect(function(obj) print('selected', obj) end)
+page2:newToggle():setText('toggle 4'):setOnUnselect(function(obj) print('unselected', obj) end)
 page2:newToggle():setText('toggle 5'):setToggled(true)
 
 -- normal slider
