@@ -16,7 +16,7 @@ end
 
 function api.press(obj)
    if obj.press then
-      obj:press(obj)
+      obj.press(obj)
    end
 end
 
