@@ -536,6 +536,7 @@ end
 -- rendering
 function events.tick()
    lastMinecraftScreen = host:getScreen()
+   if not currentPage then return end
    -- panels animations
    panelsOldEnableTime = panelsEnableTime
    panelsEnableTime = math.clamp(panelsEnableTime + (panelsEnabled and 0.25 or -0.25), 0, 1)
