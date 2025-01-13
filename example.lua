@@ -115,7 +115,10 @@ do
       testPage:newReturnButton()
    end)
 
-   page:newPageRedirect():setText('test page'):setPage(testPage)
+   page:newPageRedirect()
+      :setText('test page')
+      :setPage(testPage)
+      :setIcon('theme', vec(0, 8, 8, 8), true)
 end
 
 -- create mrrowww page

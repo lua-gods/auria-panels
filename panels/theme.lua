@@ -39,6 +39,10 @@ return host:isHost() and {
    selected = '#ffffff',
    pressed = '#545454',
 
+   iconTintUnselected = '#a8a8a8',
+   iconTintSelected = '#ffffff',
+   iconTintPressed = '#545454',
+
    returnDefault = '#fc5454',
    returnSelected = '#ffaaba',
    returnPressed = '#891e2b',

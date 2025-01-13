@@ -320,12 +320,12 @@ function defaultElementMethods:setText(text)
    return self
 end
 
----sets icons for element, uv x, y is pos z, w is size, select uv and press uv will be used instead of uv when present and element is selected/pressed
+---sets icons for element, uv x, y is pos z, w is size, select uv and press uv will be used instead of uv when present and element is selected/pressed, is selectUv is true icons will be tinted instead
 ---@generic self
 ---@param self self
 ---@param texture Texture|"theme"?
 ---@param uv Vector4?
----@param selectUv Vector4?
+---@param selectUv Vector4|boolean|nil
 ---@param pressUv Vector4?
 ---@return self
 function defaultElementMethods:setIcon(texture, uv, selectUv, pressUv)
@@ -334,7 +334,8 @@ function defaultElementMethods:setIcon(texture, uv, selectUv, pressUv)
          texture = texture,
          uv = uv,
          selectUv = selectUv,
-         pressUv = pressUv
+         pressUv = pressUv,
+         tint = selectUv == true
       }
    else
       self.icon = nil
@@ -630,11 +631,14 @@ local function updateElement(i, v)
       local textureSize = iconTexture:getDimensions()
       tasks.icon:setTexture(iconTexture, textureSize.x, textureSize.y):setScale(8 / textureSize.x, 8 / textureSize.y, 0)
       local uv = isPressed and v.icon.pressUv or isSelected and v.icon.selectUv or v.icon.uv
-      if v.icon.uv then
-         tasks.icon:setUV(uv.xy / textureSize):setRegion(uv.zw)
-      else
-         tasks.icon:setRegion(textureSize)
+      local color = vec(1, 1, 1)
+      if v.icon.tint then
+         uv = v.icon.uv
+         color = isPressed and theme.rgb.iconTintPressed or isSelected and theme.rgb.iconTintSelected or theme.rgb.iconTintUnselected
       end
+      tasks.icon:setUV(uv.xy / textureSize)
+         :setRegion(uv.zw)
+         :setColor(color)
    else
       model:setPos(0, 0, 0)
       tasks.icon:setVisible(false)
