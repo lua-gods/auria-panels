@@ -62,8 +62,9 @@ setmetatable(theme.rgb, {
 })
 --#endregion
 --#region panels methods
---- @class panelsPage
-local pageApi = {elements = {}}
+---@class panelsPage
+---@field elements (panelsElementDefault|table)[]
+local pageApi = {}
 local pageMetatable = {__index = pageApi}
 
 --- creates new page
@@ -225,11 +226,26 @@ end
 --- @return self
 function pageApi:removeElement(i)
    if not self.elements[i] then return self end
-   if self.elements[i].renderData.model then
+   if self.elements[i].renderData then
       panelsHud:removeChild(self.elements[i].renderData.model)
       panelsApi.reload()
+      self.elements[i].renderData = nil
    end
    table.remove(self.elements, i)
+   return self
+end
+
+--- adds element to page 
+--- @param obj panelsElementDefault
+--- @param pos? number
+--- @return self
+function pageApi:addElement(obj, pos)
+   if pos then
+      table.insert(self.elements, pos, obj)
+   else
+      table.insert(self.elements, obj)
+   end
+   panelsApi.reload()
    return self
 end
 

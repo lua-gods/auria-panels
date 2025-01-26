@@ -171,3 +171,46 @@ page2:newPageRedirect():setPage(page3):setText('mrow')
 
 -- add return button so you can go back to main page
 page2:newReturnButton()
+
+--- moving elements test page
+local page4 = panels.newPage()
+
+page:newPageRedirect()
+   :setPage(page4)
+   :setText('moving elements')
+
+page4:newText()
+   :setText('rotate up')
+   :onPress(function()
+      local first = page4.elements[1]
+      page4:removeElement(1)
+      page4:addElement(first)
+   end)
+
+page4:newText()
+   :setText('rotate down')
+   :onPress(function()
+      local i = #page4.elements
+      local last = page4.elements[i]
+      page4:removeElement(i)
+      page4:addElement(last, 1)
+   end)
+
+page4:newText()
+   :setText('randomize')
+   :onPress(function()
+      local elements = {}
+      for i = #page4.elements, 1, -1 do
+         table.insert(elements, math.random(#elements + 1), page4.elements[i])
+         page4:removeElement(i)
+      end
+      for _, v in pairs(elements) do
+         page4:addElement(v)
+      end
+   end)
+
+page4:newText():setText('1')
+page4:newText():setText('2')
+page4:newText():setText('3')
+
+page4:newReturnButton()
