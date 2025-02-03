@@ -2,7 +2,8 @@
 if not host:isHost() then return setmetatable({}, {__index = function() error('panels are host only, add host:isHost() if check around your code that uses panels') end}) end
 
 -- modelpart
-local panelsHud = models:newPart('panelsHud', 'Hud')
+local panelsHudBase = models:newPart('panelsHud', 'Hud')
+local panelsHud = panelsHudBase:newPart('')
 
 --- @class panelsApi
 local panelsApi = {}
@@ -557,6 +558,11 @@ function events.tick()
    -- panels animations
    panelsOldEnableTime = panelsEnableTime
    panelsEnableTime = math.clamp(panelsEnableTime + (panelsEnabled and 0.25 or -0.25), 0, 1)
+   -- only update rest of stuff when panels are visible
+   if panelsEnableTime == 0 then
+      pageAnim = 0
+      return
+   end
    oldPanelOffsets = panelOffsets
    panelOffsets = {}
    theme.updateOffsets(oldPanelOffsets, panelOffsets)
@@ -669,7 +675,7 @@ local function updateElement(i, v)
    return height
 end
 
-function events.world_render(delta)
+panelsHudBase.preRender = function(delta)
    local panelsTime = math.lerp(panelsOldEnableTime, panelsEnableTime, delta)
    panelsHud:setVisible(panelsTime > 0)
    if panelsTime == 0 then return end
