@@ -702,8 +702,8 @@ panelsHudBase.preRender = function(delta)
                   pos = vec(0, 0)
                }
                v.renderData.elementModel = v.renderData.model:newPart('')
-               v.renderData.elementModel:newText('text'):setOutline(true)
-               v.renderData.elementModel:newSprite('icon'):pos(10, 0, 0)
+               v.renderData.elementModel:newText('text'):setOutline(true):setLight(15, 15)
+               v.renderData.elementModel:newSprite('icon'):pos(10, 0, 0):setLight(15, 15)
                if elements[v.type].createModel then elements[v.type].createModel(v.renderData.elementModel) end
             end
          end

@@ -108,9 +108,9 @@ end
 
 -- rendering
 function api.createModel(model)
-   model:newSprite('line'):setTexture(whitePixel, 1, 1):setPos(0, -8, -1)
-   model:newSprite('lineOutline'):setTexture(whitePixel, 1, 3):setPos(1, -7, 1)
-   model:newText('cursor'):setText('|'):setOutline(true):setVisible(false)
+   model:newSprite('line'):setTexture(whitePixel, 1, 1):setPos(0, -8, -1):setLight(15, 15)
+   model:newSprite('lineOutline'):setTexture(whitePixel, 1, 3):setPos(1, -7, 1):setLight(15, 15)
+   model:newText('cursor'):setText('|'):setOutline(true):setVisible(false):setLight(15, 15)
 end
 
 local function getTextWidth(str)

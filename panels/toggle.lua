@@ -54,9 +54,9 @@ end
 -- rendering
 function api.createModel(model)
    model:getTask('text'):setPos(-18, 0, 0)
-   model:newText('toggle'):setOutline(true):setPos(-2, 0, 0)
-   model:newText('toggleLeft'):setOutline(true):setPos(0, 0, 2)
-   model:newText('toggleRight'):setOutline(true):setPos(-10, 0, 2)
+   model:newText('toggle'):setOutline(true):setPos(-2, 0, 0):setLight(15, 15)
+   model:newText('toggleLeft'):setOutline(true):setPos(0, 0, 2):setLight(15, 15)
+   model:newText('toggleRight'):setOutline(true):setPos(-10, 0, 2):setLight(15, 15)
 end
 
 function api.renderElement(data, isSelected, isPressed, model, tasks)

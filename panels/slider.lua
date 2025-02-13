@@ -122,11 +122,11 @@ end
 -- rendering
 function api.createModel(model)
    model:getTask('text'):setPos(-sliderLen - 4, 0, 0)
-   model:newSprite('slider'):setTexture(whitePixel, 1, 7)
-   model:newSprite('sliderBg'):setTexture(whitePixel, 1, 7)
-   model:newSprite('sliderOutline'):setTexture(whitePixel, sliderLen + 2, 9):setColor(panels.theme.rgb.sliderOutline):setPos(1, 1, 1)
-   model:newText('sliderText')
-   model:newText('sliderText2')
+   model:newSprite('slider'):setTexture(whitePixel, 1, 7):setLight(15, 15)
+   model:newSprite('sliderBg'):setTexture(whitePixel, 1, 7):setLight(15, 15)
+   model:newSprite('sliderOutline'):setTexture(whitePixel, sliderLen + 2, 9):setColor(panels.theme.rgb.sliderOutline):setPos(1, 1, 1):setLight(15, 15)
+   model:newText('sliderText'):setLight(15, 15)
+   model:newText('sliderText2'):setLight(15, 15)
 end
 
 local function getTextColor(color)

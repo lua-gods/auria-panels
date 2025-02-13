@@ -149,8 +149,8 @@ end
 -- rendering
 function api.createModel(model)
    model:getTask('text'):setPos(-10, 0)
-   model:newSprite('color'):setTexture(whitePixel, 7, 7)
-   model:newSprite('colorBg'):setTexture(whitePixel, 9, 9):setPos(1, 1, 1)
+   model:newSprite('color'):setTexture(whitePixel, 7, 7):setLight(15, 15)
+   model:newSprite('colorBg'):setTexture(whitePixel, 9, 9):setPos(1, 1, 1):setLight(15, 15)
 end
 
 function api.renderElement(data, isSelected, isPressed, model, tasks)
