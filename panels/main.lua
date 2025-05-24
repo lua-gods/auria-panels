@@ -652,7 +652,7 @@ local function updateElement(i, v)
       if iconTexture == 'theme' then iconTexture = theme.icons end
       local textureSize = iconTexture:getDimensions()
       tasks.icon:setTexture(iconTexture, textureSize.x, textureSize.y):setScale(8 / textureSize.x, 8 / textureSize.y, 0)
-      local uv = isPressed and v.icon.pressUv or isSelected and v.icon.selectUv or v.icon.uv
+      local uv = isPressed and v.icon.pressUv or isSelected and v.icon.selectUv or v.icon.uv or textureSize.__xy
       local color = vec(1, 1, 1)
       if v.icon.tint then
          uv = v.icon.uv

@@ -178,6 +178,7 @@ local page4 = panels.newPage()
 page:newPageRedirect()
    :setPage(page4)
    :setText('moving elements')
+   :setIcon(textures['panels.icons'])
 
 page4:newText()
    :setText('rotate up')
