@@ -5,6 +5,8 @@ if not host:isHost() then return setmetatable({}, {__index = function() error('p
 local panelsHudBase = models:newPart('panelsHud', 'Hud')
 local panelsHud = panelsHudBase:newPart('')
 
+panelsHud:setOverlay(0, 15) -- overlay fix
+
 --- @class panelsApi
 local panelsApi = {}
 --- @class panelsElementDefault
@@ -83,7 +85,7 @@ function panelsApi.newPage(name)
    return page
 end
 
---- sets panel page to the one provided, you can also use name of page instead 
+--- sets panel page to the one provided, you can also use name of page instead
 --- @overload fun(page: panelsPage, keepHistory: boolean?, dontAddToHistory: boolean?)
 --- @overload fun(pageName: string, keepHistory: boolean?, dontAddToHistory: boolean?)
 function panelsApi.setPage(page, keepHistory, dontAddToHistory, reverseZoomAnimation, selectedElement)
@@ -222,7 +224,7 @@ end
 
 --#endregion
 --#region page
---- removes element from page 
+--- removes element from page
 --- @param i number
 --- @return self
 function pageApi:removeElement(i)
@@ -236,7 +238,7 @@ function pageApi:removeElement(i)
    return self
 end
 
---- adds element to page 
+--- adds element to page
 --- @param obj panelsElementDefault
 --- @param pos? number
 --- @return self
@@ -690,7 +692,7 @@ panelsHudBase.preRender = function(delta)
    panelsPos = -panelsHud:getPos().xy or vec(0, 0)
    if needReload then
       needReload = false
-      
+
       if currentPage then
          -- create render data
          for i, v in pairs(currentPage.elements) do
