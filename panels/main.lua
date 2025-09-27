@@ -597,7 +597,7 @@ function events.tick()
       return
    end
    oldMousePos = mousePos
-   mousePos = panelsPos - client:getMousePos() / client:getGuiScale()
+   mousePos = panelsPos - client.getMousePos() * client.getScaledWindowSize() / client.getWindowSize()
    if mouseClick:isPressed() and selectedWithMouse and not panelsApi.textInputElement then
       local obj = currentPage.elements[selectedFull]
       if obj and elements[obj.type].scroll then
