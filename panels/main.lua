@@ -373,13 +373,23 @@ function defaultElementMethods:onSelect(func)
    return self
 end
 
---- set function that will be called when element is unselected,returns itself for chaining
+--- set function that will be called when element is unselected, returns itself for chaining
 ---@generic self
 ---@param self self
 ---@param func fun(obj: panelsElementDefault)?
 ---@return self
 function defaultElementMethods:onUnselect(func)
    self.unselectFunc = func
+   return self
+end
+
+--- set function that will be called when element is released, returns itself for chaining
+---@generic self
+---@param self self
+---@param func fun(obj: panelsElementDefault)?
+---@return self
+function defaultElementMethods:onRelease(func)
+   self.releaseFunc = func
    return self
 end
 --#endregion
@@ -465,6 +475,12 @@ panelsClick.press = function()
 end
 
 panelsClick.release = function()
+   if currentPage and not clickOpenedPanels then
+      local obj = currentPage.elements[selectedFull]
+      if obj and obj.releaseFunc then
+         obj.releaseFunc(obj)
+      end
+   end
    clickOpenedPanels = false
    panelsApi.reload()
 end
@@ -480,7 +496,15 @@ mouseClick.press = function()
    return true
 end
 
-mouseClick.release = panelsApi.reload
+mouseClick.release = function()
+   if currentPage and not clickOpenedPanels then
+      local obj = currentPage.elements[selectedFull]
+      if obj and obj.releaseFunc then
+         obj.releaseFunc(obj)
+      end
+   end
+   panelsApi.reload()
+end
 
 -- shift
 local shift = keybinds:newKeybind('panels - shift', 'key.keyboard.left.shift', true)

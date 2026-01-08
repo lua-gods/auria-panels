@@ -80,7 +80,7 @@ page2:newToggle():setText('always on'):onToggle(function(_, self) self:setToggle
 page2:newToggle():setText('always off'):onToggle(function(_, self) self:setToggled(false) end)
 page2:newToggle():setText('toggle 3'):onSelect(function(obj) print('selected', obj) end)
 page2:newToggle():setText('toggle 4'):onUnselect(function(obj) print('unselected', obj) end)
-page2:newToggle():setText('toggle 5'):setToggled(true)
+page2:newToggle():setText('toggle 5'):setToggled(true):onRelease(function(obj) print('released', obj) end)
 
 -- normal slider
 page2:newSlider():setRange(10, 30)
