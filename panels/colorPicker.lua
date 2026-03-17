@@ -9,10 +9,21 @@ local api = {page = myPageApi, methods = methods}
 local whitePixel = textures.whitePixel or textures:newTexture('whitePixel', 1, 1):pixel(0, 0, 1, 1, 1)
 
 -- page
-local page, currentColor, updateElements, colorPickerObj
+local page, currentColor, currentColorHsv, updateElements, colorPickerObj
 local function pageInit()
+   local isHsv = false
+   local function setHsv(x)
+      if x then
+         currentColor = vectors.hsvToRGB(currentColorHsv)
+      else
+         currentColorHsv = vectors.rgbToHSV(currentColor)
+      end
+      isHsv = x
+   end
+
    local function updateColor()
       if currentColor ~= colorPickerObj.color then
+         setHsv(isHsv)
          colorPickerObj.color = currentColor:copy()
          if colorPickerObj.func then
             colorPickerObj.func(colorPickerObj.color, colorPickerObj)
@@ -32,27 +43,28 @@ local function pageInit()
    local hue = page:newSlider():setRange(0, 360):setStep(20, 1):allowWarping(true):setText('hue')
    local saturation = page:newSlider():setRange(0, 100):setStep(10, 1):setText('saturation')
    local value = page:newSlider():setRange(0, 100):setStep(10, 1):setText('value')
-   red:onScroll(function(v) currentColor.r = v / 255 updateElements() end)
-   green:onScroll(function(v) currentColor.g = v / 255 updateElements() end)
-   blue:onScroll(function(v) currentColor.b = v / 255 updateElements() end)
-   hue:onScroll(function(v) local hsv = vectors.rgbToHSV(currentColor) hsv.x = v / 360 currentColor = vectors.hsvToRGB(hsv) updateElements() end)
-   saturation:onScroll(function(v) local hsv = vectors.rgbToHSV(currentColor) hsv.y = v / 100 currentColor = vectors.hsvToRGB(hsv) updateElements() end)
-   value:onScroll(function(v) local hsv = vectors.rgbToHSV(currentColor) hsv.z = v / 100 currentColor = vectors.hsvToRGB(hsv) updateElements() end):setMargin(2)
+
+   function updateElements()
+      setHsv(isHsv) -- update hsv
+      colorPreview:setColor(currentColor):setText('#' .. vectors.rgbToHex(currentColor))
+      red:setValue(math.round(currentColor.r * 255)):setColor(1, 0, 0)
+      green:setValue(math.round(currentColor.g * 255)):setColor(0, 1, 0)
+      blue:setValue(math.round(currentColor.b * 255)):setColor(0, 0, 1)
+      hue:setValue(math.round(currentColorHsv.x * 360)):setColor(vectors.hsvToRGB(currentColorHsv.x, 1, 1))
+      saturation:setValue(math.round(currentColorHsv.y * 100)):setColor(vectors.hsvToRGB(currentColorHsv.x, currentColorHsv.y, 1))
+      value:setValue(math.round(currentColorHsv.z * 100)):setColor(vectors.hsvToRGB(0, 0, currentColorHsv.z))
+   end
+
+   red  :onScroll(function(v) setHsv(false) currentColor.r = v / 255 updateElements() end)
+   green:onScroll(function(v) setHsv(false) currentColor.g = v / 255 updateElements() end)
+   blue :onScroll(function(v) setHsv(false) currentColor.b = v / 255 updateElements() end)
+   hue       :onScroll(function(v) setHsv(true) currentColorHsv.x = v / 360 updateElements() end)
+   saturation:onScroll(function(v) setHsv(true) currentColorHsv.y = v / 100 updateElements() end)
+   value     :onScroll(function(v) setHsv(true) currentColorHsv.z = v / 100 updateElements() end):setMargin(2)
 
    page:newPageRedirect():setPage(colorPresetsPage):setText('presets')
 
    page:newReturnButton():onReturn(updateColor)
-
-   function updateElements()
-      colorPreview:setColor(currentColor):setText('#' .. vectors.rgbToHex(currentColor))
-      red:setValue(currentColor.r * 255):setColor(1, 0, 0)
-      green:setValue(currentColor.g * 255):setColor(0, 1, 0)
-      blue:setValue(currentColor.b * 255):setColor(0, 0, 1)
-      local hsv = vectors.rgbToHSV(currentColor)
-      hue:setValue(math.round(hsv.x * 360)):setColor(vectors.hsvToRGB(hsv.x, 1, 1))
-      saturation:setValue(math.round(hsv.y * 100)):setColor(vectors.hsvToRGB(hsv.x, hsv.y, 1))
-      value:setValue(math.round(hsv.z * 100)):setColor(vectors.hsvToRGB(0, 0, hsv.z))
-   end
 
    local colors = {
       {"#000000", "black"},
@@ -78,6 +90,7 @@ local function pageInit()
       element:setEnabled(false):setColor(color):setText(v[2])
       element:onPress(function()
          currentColor = color:copy()
+         isHsv = false
          updateElements()
          updateColor()
          panels.previousPage()
